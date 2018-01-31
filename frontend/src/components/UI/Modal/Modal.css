@@ -1,0 +1,91 @@
+.XMark {
+    position: absolute;
+    top: 23px;
+    right: 8px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    z-index: 100501;
+    display: inline-block;
+    overflow: hidden;
+    font-size: 0;
+}
+.XMark:before, .XMark:after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    margin-top: -1px;
+    background-color: #cacaca;
+}
+.XMark:before {
+    transform: rotate(45deg);
+}
+.XMark:after {
+    transform: rotate(-45deg);
+}
+.Modal {
+    position: fixed;
+    z-index: 100500;
+    width: 475px;
+    border: none;
+    padding: 0;
+    left: 0;
+    right: 0;
+    top: 116px;
+    box-sizing: border-box;
+    transition: all 0.3s ease-out;
+    margin: 0 auto;
+    max-height: calc(100% - 232px);
+    background-color: transparent;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+.Modal.ExtraLarge {
+    width: 1100px;
+    top: 30px;
+    max-height: calc(100% - 60px);
+}
+.Modal.SixZeroZero {
+    width: 596px;
+}
+.Modal.AlmostBigModal {
+    width: 1020px;
+    top: 30px;
+    max-height: calc(100% - 60px);
+}
+.Modal.BigModal {
+    width: 90%;
+}
+.Modal.NoLongerAvailableModal {
+    width: 808px;
+}
+@media (max-width: 1100px) {
+    .Modal.ExtraLarge {
+        width: 90%;
+    }
+}
+@media (max-width: 1020px) {
+    .Modal.AlmostBigModal {
+        width: 90%;
+    }
+}
+@media (max-width: 808px) {
+    .Modal.NoLongerAvailableModal {
+        width: 90%;
+    }
+}
+@media (max-width: 767px) {
+    .Modal {
+        top: 30px;
+        width: 90%;
+        max-height: calc(100% - 60px);
+    }
+}
+@media (max-width: 600px) {
+    .Modal.SixZeroZero {
+        width: 90%;
+    }
+}

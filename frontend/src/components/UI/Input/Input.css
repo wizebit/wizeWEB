@@ -1,0 +1,181 @@
+.Input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.Label {
+    display: block;
+    color: #8d8d8d;
+    font-size: 16px;
+    font-weight: 400;
+    margin: 0 0 4px;
+    padding: 0;
+    border: none;
+    font-family: "Droid Sans", sans-serif;
+    vertical-align: baseline;
+}
+
+.InputElement {
+    outline: none;
+    border: 1px solid #2b9dc4;
+    font: inherit;
+    padding: 16px 20px;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Droid Sans", sans-serif;
+    font-size: 19px;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    margin-bottom: 10px;
+    line-height: 23px;
+    transition: .4s;
+    min-height: 55px;
+    background-color: transparent;
+    color: #2b9dc4;
+}
+.InputElement::placeholder {
+    color: #2b9dc4;
+}
+
+.InputElement:focus {
+    outline: none;
+}
+
+.Invalid {
+    border: 1px solid #ff6060;
+}
+
+.Untouchable {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.Datepicker {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.DatepickerPicker {
+    position: absolute;
+    right: -1px;
+    top: 100%;
+    overflow: hidden;
+    transition: .4s;
+}
+.ActiveDatepicker .DatepickerPicker {
+    z-index: 100500;
+}
+.ErrorMessage {
+    color: #ff6060;
+    margin: 0 0 10px;
+    font-size: 15px;
+    font-family: "Droid Sans", sans-serif;
+    font-weight: 400;
+    line-height: 1;
+    display: block;
+    text-align: left;
+}
+.PhoneInputGroup {
+    position: relative;
+    display: block;
+}
+.PhoneInputGroup > div {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+.FileInput {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.FileInput label {
+    display: none;
+}
+.FileInput>div {
+    background-color: #3c5b0b;
+    color: #ffffff;
+    font-family: "Roboto", sans-serif;
+    font-size: 19px;
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    width: calc(100% - 138px);
+    height: 55px;
+    padding: 16px 20px;
+    box-sizing: border-box;
+    text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.FileInput>button {
+    position: relative;
+    color: #2f4b0b;
+    font-family: "Droid Sans", sans-serif;
+    font-size: 21px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.71px;
+    padding: 15px 26px;
+    max-width: 138px;
+    cursor: pointer;
+    outline: none;
+}
+.FileInput>button>input {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    outline: none;
+}
+.DatepickerButton {
+    background-color: transparent;
+    border: none;
+    padding: 0 18px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    cursor: pointer;
+    outline: none;
+}
+.IsValid {
+    margin-top: 1px;;
+}
+.IsValid img {
+    height: 100%;
+    padding: 15px;
+}
+.IsValid button {
+    border: none;
+    cursor: pointer;
+    height: 100%;
+    padding: 15px;
+    color: #ffffff;
+    font-family: "Droid Sans", sans-serif;
+    font-size: 21px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.71px;
+    background-color: #78aa27;
+    outline: none;
+}
+@media (max-width: 767px) {
+    .InputElement {
+        margin-bottom: 30px;
+        border: none;
+    }
+}
+@media (max-width: 335px) {
+    .DatepickerPicker {
+        right: -15px;
+    }
+}

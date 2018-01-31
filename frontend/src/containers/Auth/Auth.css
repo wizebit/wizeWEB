@@ -1,0 +1,31 @@
+.Auth {
+    margin: calc(30vh - 31px) auto;
+    height: 40vh;
+    width: 100%;
+    border: 1px solid #2b9dc4;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, .05);
+}
+.AuthForm {
+    width: 100%;
+    text-align: center;
+}
+.AuthForm h1 {
+    color: #2b9dc4;
+    font-family: "Droid Sans", sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+}
+.ButtonSection {
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+}
+@media (min-width: 600px) {
+    .Auth {
+        width: 475px;
+    }
+}

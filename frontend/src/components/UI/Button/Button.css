@@ -1,0 +1,31 @@
+.Button {
+    background-color: transparent;
+    border: 1px solid #2b9dc4;
+    color: #2b9dc4;
+    outline: none;
+    cursor: pointer;
+    font: inherit;
+    font-family: "Droid Sans", sans-serif;
+    font-size: 21px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.71px;
+    padding: 15px 60px;
+    box-sizing: border-box;
+    transition: .4s;
+}
+.Button:hover, .Button:active {
+    background-color: #2b9dc4;
+    color: white;
+    border-color: white;
+}
+.Button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+/*.Success {*/
+    /*color: #78aa27;*/
+/*}*/
+/*.Danger {*/
+    /*color: #944317;*/
+/*}*/
