@@ -1,22 +1,7 @@
 package main
 
-import "net/http"
-
-type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
-}
-
-type Routes []Route
-
-var routes = Routes{
-	Route{"Auth","POST","/",Auth},
-	Route{
-		"TodoCreate",
-		"POST",
-		"/todos",
-		TodoCreate,
-	},
+func (a *App) initializeRoutes() {
+	//Auth
+	a.Router.HandleFunc("/auth/sign-in", a.UserSignIn).Methods("POST")
+	a.Router.HandleFunc("/auth/sign-up", a.UserSignUp).Methods("POST")
 }

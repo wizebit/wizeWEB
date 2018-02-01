@@ -1,0 +1,5 @@
+Server = "127.0.0.1"
+Port = "54320"
+Name = "wizebit"
+User = "homestead"
+Password = "secret"
