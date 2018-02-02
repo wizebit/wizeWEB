@@ -1,16 +1,16 @@
 package services
 
 import (
-	"path/filepath"
-	"log"
 	"github.com/BurntSushi/toml"
+	"log"
+	"path/filepath"
 )
 
 type dbConfig struct {
-	Server string
-	Port string
-	Name string
-	User string
+	Server   string
+	Port     string
+	Name     string
+	User     string
 	Password string
 }
 

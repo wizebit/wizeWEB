@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/astaxie/beego/orm"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/grrrben/golog"
 	_ "github.com/lib/pq"
@@ -50,10 +51,14 @@ func (a *App) Init() {
 
 //Run web app
 func (a *App) Run() {
+	headers := handlers.AllowedHeaders([]string{"Content-Type"})
+	origins := handlers.AllowedOrigins([]string{"*"})
+	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
 	p := fmt.Sprintf("%d", a.ClientPort)
 	fmt.Println("Starting server")
 	fmt.Printf("Running on Port %s\n", p)
-	log.Fatal(http.ListenAndServe(":"+p, a.Router))
+	log.Fatal(http.ListenAndServe(":"+p, handlers.CORS(origins, headers, methods)(a.Router)))
 }
 
 func main() {
@@ -71,6 +76,7 @@ func main() {
 	if err != nil {
 		golog.Errorf("Unable to cast Prt to uint: %s", err)
 	}
+
 	// different Clients can have different ports,
 	// used to connect multiple Clients in debug.
 	ClientPort = uint16(u)

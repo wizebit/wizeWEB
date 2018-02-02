@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
+// import { connect } from 'react-redux';
 import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
 // import asyncComponent from './hoc/asyncComponent/asyncComponent';
 
-// import Layout from './hoc/Layout/Layout';
 import Auth from './containers/Auth/Auth';
 
 class App extends Component {
   render() {
-    return <div className="App">
-        <Auth />
+      let routes = <Switch>
+          <Route exact path="/" component={Auth} />
+          <Redirect to="/" />
+      </Switch>;
+
+      return <div>
+          {routes}
       </div>;
   }
 }

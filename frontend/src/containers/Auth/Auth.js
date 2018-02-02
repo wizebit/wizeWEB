@@ -1,38 +1,33 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, {Component} from 'react';
+import axios from 'axios';
+import FileSaver from 'file-saver';
+import ReCAPTCHA from "react-google-recaptcha";
 
-import Input from '../../components/UI/Input/Input';
-import Button from '../../components/UI/Button/Button';
-import Spinner from '../../components/UI/Spinner/Spinner';
 import classes from './Auth.css';
-import * as actions from '../../store/actions/index';
+import {API_URL} from "../../shared/const";
+import Spinner from '../../components/UI/Spinner/Spinner';
 import checkValidity from '../../shared/validation';
+import Button from '../../components/UI/Button/Button';
+import Input from '../../components/UI/Input/Input';
 import Aux from '../../hoc/Aux/Aux';
 import Modal from '../../components/UI/Modal/Modal';
 
+
 class Auth extends Component {
+    captcha;
+
     state = {
+        register: false,
+        loading: false,
+        error: null,
+        accData: null,
+        regData: null,
         controls: {
-            email: {
+            privateKey: {
                 elementType: 'input',
                 elementConfig: {
-                    type: 'email',
-                    placeholder: 'Email'
-                },
-                value: '',
-                validation: {
-                    required: true,
-                    isEmail: true
-                },
-                valid: false,
-                touched: false,
-                errorMessage: null
-            },
-            password: {
-                elementType: 'input',
-                elementConfig: {
-                    type: 'password',
-                    placeholder: 'Password'
+                    type: 'text',
+                    placeholder: 'Private Key'
                 },
                 value: '',
                 validation: {
@@ -42,8 +37,7 @@ class Auth extends Component {
                 touched: false,
                 errorMessage: null
             },
-        },
-        isRegister: false
+        }
     };
 
     inputChangedHandler = (event, controlName) => {
@@ -60,26 +54,57 @@ class Auth extends Component {
         this.setState({controls: updatedControls});
     };
 
-    submitHandler = (e) => {
+    onSubmitHandler = (e) => {
         e.preventDefault();
-        if (!this.state.isRegister) {
-            this.props.onAuth(this.state.controls.userName.value, this.state.controls.password.value);
-            console.log('login', this.state.controls.userName.value, this.state.controls.password.value);
-        } else {
-            console.log('register', this.state.controls.userName.value, this.state.controls.password.value);
+        const conf = {headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }};
 
-        }
+        this.setState({accData: null, loading: true, error: null});
+
+        axios.post(`${API_URL}/auth/sign-in`, {private_key: this.state.controls.privateKey.value}, conf)
+            .then(response => {
+                this.setState({accData: response.data, loading: false, error: null});
+                console.log(response)
+            })
+            .catch(error => {
+                this.setState({accData: false, loading: false, error: error.response.data.message});
+                console.log(error.response.data.message)
+            })
     };
 
-    changeFormHandler = () => {
-        this.setState({isRegister: !this.state.isRegister});
+    onSignUpHandler = () => {
+        const conf = {headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }};
+
+        this.setState({regData: null, loading: true, error: null});
+
+        axios.post(`${API_URL}/auth/sign-up`, {}, conf)
+            .then(response => {
+                this.setState({regData: response.data, loading: false, error: null});
+                console.log(response)
+            })
+            .catch(error => {
+                this.setState({regData: false, loading: false, error: error.response.data.message});
+                console.log(error.response.data.message)
+            })
+    };
+
+    saveAsDocHandler = () => {
+        let text = '';
+        Object.keys(this.state.regData).map(key => {text += `${key} : ${this.state.regData[key]}\n`});
+        const blob = new Blob([text], {type: "text/plain;charset=utf-8"});
+        FileSaver.saveAs(blob, "my-account.txt");
     };
 
     modalCloseHandler = () => {
-        this.props.onLogout('/cart');
+        this.setState({error: null});
     };
 
-    render () {
+    render() {
         // form
         const formElementsArray = [];
         for ( let key in this.state.controls ) {
@@ -89,85 +114,86 @@ class Auth extends Component {
             } );
         }
 
-        let form = formElementsArray.map( formElement => (
-            <Input
-                errorMessage={formElement.config.errorMessage}
-                key={formElement.id}
-                elementType={formElement.config.elementType}
-                elementConfig={formElement.config.elementConfig}
-                value={formElement.config.value}
-                invalid={!formElement.config.valid}
-                shouldValidate={formElement.config.validation}
-                touched={formElement.config.touched}
-                changed={( event ) => this.inputChangedHandler( event, formElement.id )} />
-        ) );
-        // from /
+        let authForm = <form  className={classes.AuthForm} onSubmit={this.onSubmitHandler}>
+            {
+                formElementsArray.map(
+                    formElement => <Input
+                        errorMessage={formElement.config.errorMessage}
+                        key={formElement.id}
+                        elementType={formElement.config.elementType}
+                        elementConfig={formElement.config.elementConfig}
+                        value={formElement.config.value}
+                        invalid={!formElement.config.valid}
+                        shouldValidate={formElement.config.validation}
+                        touched={formElement.config.touched}
+                        changed={( event ) => this.inputChangedHandler( event, formElement.id )}
+                    />
+                )
+            }
+            <Button>Sign in</Button>
+        </form>;
+        // form /
 
-        if (this.props.loading) {
-            form = <Spinner />;
+        if (this.state.register) {
+            if (!this.state.regData) {
+                authForm = <form className={classes.AuthForm} onSubmit={(e) => {e.preventDefault(); this.captcha.execute(); this.onSignUpHandler()}}>
+                    <ReCAPTCHA
+                        ref="recaptcha"
+                        size="invisible"
+                        sitekey="6LfBAUQUAAAAAJi3xgNGMvz50-R5F2iTMgpW9J2q"
+                        onChange={() =>{}}
+                    />
+                    <Button onClick={() => this.onSignUpHandler()}>Sign up</Button>
+                </form>
+            } else {
+                authForm = <div className={classes.AuthForm}>
+                    <h1 className={classes.Danger}>
+                        Don't forget to save your account details.
+                        <br/>
+                        In case of loss, your account will be lost forever!
+                    </h1>
+                    {Object.keys(this.state.regData).map(key => <p key={key}>
+                        {`${key} : ${this.state.regData[key]}`}
+                    </p>)}
+                    <Button onClick={() => this.saveAsDocHandler()}>Save as doc</Button>
+                </div>
+            }
         }
 
-        //On form change
-        let nowText = "Sign In",
-            altText = "Sign Up";
-        if (this.state.isRegister) {
-            nowText = "Sign Up";
-            altText = "Sign In";
+        let view = <div className={classes.Auth}>
+            <label className={classes.preorderListTrigger}>
+                <div>Sign in</div>
+                <input type="checkbox"
+                       checked={this.state.register}
+                       onChange={() => {this.setState({register: !this.state.register})}}/>
+                <span />
+                <div>Sign up</div>
+            </label>
+
+            {authForm}
+        </div>;
+
+        if (this.state.loading) {
+            view = <Spinner />
         }
-        //On form change /
 
-
-        return (
-
-            <Aux>
-                <Modal
-                    show={ this.props.error ? this.props.error : null }
-                    modalClosed={() => this.modalCloseHandler}>
+        return <Aux>
+                <Modal show={ this.state.error ? this.state.error : null }
+                       modalClosed={() => this.modalCloseHandler()}>
                     {
-                        this.props.error
-                        ? this.props.error
-                        : null
+                        this.state.error
+                            ? <div className={classes.ModalContent}>
+                                <h1>{this.state.error}</h1>
+                                <Button onClick={() => this.modalCloseHandler()}>Ok</Button>
+                            </div>
+                            : null
                     }
                 </Modal>
-                <div className={classes.Auth}>
-                    <form className={classes.AuthForm} onSubmit={this.submitHandler}>
-                        <h1>{nowText}</h1>
-
-                        {form}
-
-                        <div className={classes.ButtonSection}>
-                            <Button>
-                                {nowText}
-                            </Button>
-                            <Button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    this.changeFormHandler()
-                                }}
-                            >
-                                {altText}
-                            </Button>
-                        </div>
-                    </form>
+                <div  className={classes.Wrapper}>
+                    {view}
                 </div>
-            </Aux>
-        );
+        </Aux>;
     }
 }
 
-const mapStateToProps = state => {
-    return {
-        isAuth: state.auth.authKey !== null,
-        loading: state.auth.loading,
-        error: state.auth.error,
-    }
-};
-
-const mapDispatchToProps = dispatch => {
-    return {
-        onAuth: (username, password) => dispatch(actions.auth(username, password)),
-        onLogout:() => dispatch(actions.logout())
-    }
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Auth);
+export default Auth;

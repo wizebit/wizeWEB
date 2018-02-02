@@ -5,15 +5,14 @@ import (
 )
 
 type Users struct {
-	Id				int			`orm:"pk;column(id);auto"`
-	Name			string
-	FirstName		string		`orm:"column(first_name)"`
-	LastName		string		`orm:"column(last_name)"`
-	Email			string		`orm:"column(email);unique"`
-	Password		string
-	Role			int
-	Rate			int
-	Status			bool
-	CreatedAt 		time.Time	`orm:"column(created_at);type(timestamp);auto_now_add"`
-	Salt			string
+	Id         int    `orm:"pk;column(id);auto"`
+	PrivateKey string `orm:"column(private_key);unique"`
+	PublicKey  string `orm:"column(public_key)"`
+	Wallet     string `orm:"column(wallet);unique"`
+	Status     bool
+	Role       int
+	Rate       int
+	CreatedAt  time.Time `orm:"column(created_at);type(timestamp);auto_now_add"`
+	UpdatedAt  time.Time `orm:"column(updated_at);type(timestamp);auto_now"`
+	Salt       string
 }

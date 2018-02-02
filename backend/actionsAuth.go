@@ -1,64 +1,64 @@
 package main
 
 import (
+	"crypto/ecdsa"
+	"encoding/json"
 	"github.com/astaxie/beego/orm"
+	"github.com/coin-network/curve"
 	"github.com/grrrben/golog"
 	"net/http"
-	"wizebit/backend/services"
 	"wizebit/backend/models"
-	"encoding/json"
-	"fmt"
+	"wizebit/backend/services"
 )
 
-//info from form will have structure
+type PublicKey ecdsa.PublicKey
+type PrivateKey ecdsa.PrivateKey
+
+//login json form will have structure
 type User struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	PrivateKey string `json:"private_key"`
 }
 
 //on user sign up (registration)
 func (a *App) UserSignUp(w http.ResponseWriter, r *http.Request) {
-	raw := services.ReadRequest(w, r)
-	var ur User
+	KoblitzCurve := curve.S256() // see https://godoc.org/github.com/btcsuite/btcd/btcec#S256
 
-	// Unmarshal json
-	err := json.Unmarshal(raw, &ur)
+	privkey, err := curve.NewPrivateKey(KoblitzCurve)
+
 	if err != nil {
+		panic("Error on create account")
+	}
+
+	pubkey := (privkey.PublicKey)
+	address := privkey.PubKey().ToAddress()
+
+	u := models.Users{
+		PrivateKey: services.GetHash(privkey.D.String()),
+		PublicKey:  services.GetHash(pubkey.X.String()),
+		Wallet:     services.GetHash(address),
+		Role:       20,
+	}
+
+	o := orm.NewOrm()
+	o.Using("default")
+
+	_, err = o.Insert(&u)
+
+	if err != nil {
+		golog.Errorf("Unable to create user: %s", err)
 		services.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if ur.Email != "" && ur.Password != "" {
-		// bcrypt password
-		pas, err := services.HashPassword(ur.Password)
-
-		if err == nil {
-			user := models.Users{
-				Email: ur.Email,
-				Password: pas,
-				Role: 20,
-			}
-
-			// create user
-			o := orm.NewOrm()
-			o.Using("default")
-			_, err = o.Insert(&user)
-			if err != nil {
-				golog.Errorf("Unable to create user: %s", err)
-				services.RespondWithError(w, http.StatusInternalServerError, err.Error())
-				return
-			}
-
-			services.RespondWithJSON(w, http.StatusOK, map[string]string{"response": "success"})
-		} else {
-			golog.Errorf("Unable to create user: %s", err)
-			services.RespondWithError(w, http.StatusInternalServerError, err.Error())
-		}
-	} else if ur.Email == "" {
-		services.RespondWithError(w, http.StatusInternalServerError, "Empty email")
-	} else if ur.Password == ""{
-		services.RespondWithError(w, http.StatusInternalServerError,"Empty password")
-	}
+	services.RespondWithJSON(
+		w,
+		http.StatusOK,
+		map[string]string{
+			"private_key": privkey.D.String(),
+			"public_key":  pubkey.X.String(),
+			"wallet":      address,
+		},
+	)
 }
 
 //on user sign in (login)
@@ -73,25 +73,20 @@ func (a *App) UserSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ur.Email != "" && ur.Password != "" {
-		user := models.Users{}
+	if ur.PrivateKey != "" {
+		var u models.Users
 
 		o := orm.NewOrm()
 		o.Using("default")
-		err := o.QueryTable("users").Filter("email", ur.Email).Limit(1).One(&user)
+		err := o.QueryTable("users").Filter("private_key", services.GetHash(ur.PrivateKey)).Limit(1).One(&u)
 
 		if err != nil {
 			services.RespondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		fmt.Println(user)
-		match := services.CheckPasswordHash(ur.Password, user.Password)
-		fmt.Println("Match:   ", match)
-
-	} else if ur.Email == "" {
-		services.RespondWithError(w, http.StatusInternalServerError, "Empty email")
-	} else if ur.Password == ""{
-		services.RespondWithError(w, http.StatusInternalServerError,"Empty password")
+		services.RespondWithJSON(w, http.StatusOK, u)
+	} else if ur.PrivateKey == "" {
+		services.RespondWithError(w, http.StatusInternalServerError, "Empty private key")
 	}
 }

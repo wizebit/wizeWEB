@@ -3,15 +3,14 @@
 -- SQL in section 'Up' is executed when this migration is applied
   CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    Name  text,
-    First_name text,
-    Last_name text,
-    Email text NOT NULL UNIQUE,
-    Password text NOT NULL,
+    Private_key text NOT NULL UNIQUE,
+    Public_key text NOT NULL,
+    Wallet text NOT NULL,
+    Status boolean DEFAULT true,
     Role int DEFAULT 20,
     Rate int DEFAULT 0,
-    Status boolean DEFAULT true,
     Created_at TIMESTAMP,
+    Updated_at TIMESTAMP,
     Salt text
   );
 
