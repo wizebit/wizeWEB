@@ -85,8 +85,35 @@ func (a *App) UserSignIn(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		services.RespondWithJSON(w, http.StatusOK, u)
+		var role string
+		switch u.Role {
+		case 0:
+			role = "admin"
+		case 10:
+			role = "moderator"
+		default:
+			role = "user"
+		}
+		 //services.CreateTokenMiddleware(w, r, role)
+
+		//services.RespondWithJSON(w, http.StatusOK, u)
+
+		token, err := services.CreateSignedTokenString(role);
+		services.RespondWithJSON(w, http.StatusOK, map[string]string{"token": token})
+
 	} else if ur.PrivateKey == "" {
 		services.RespondWithError(w, http.StatusInternalServerError, "Empty private key")
 	}
+}
+
+func ProtectedHandler(w http.ResponseWriter, r *http.Request) {
+	//services.RespondWithError(w, http.StatusInternalServerError, "Gained access to protected resource")
+
+	services.RespondWithJSON(
+		w,
+		http.StatusOK,
+		map[string]string{
+			"hello": r.Header.Get("Authorisation"),
+		},
+	)
 }
