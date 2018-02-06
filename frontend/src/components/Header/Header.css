@@ -1,0 +1,20 @@
+.Header {
+    background-color: rgba(0,0,0,.5);
+    position: fixed;
+    z-index: 904;
+    box-shadow: 2px 0 3px rgba(0,0,0,.5);
+    height: 66px;
+    width: 100%;
+    min-width: 320px;
+    padding: 0 32px 0 40px;
+}
+.HeaderContent {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+.Logo {
+    font-size: 24px;
+    color: white;
+}

@@ -1,5 +1,6 @@
-.Layout {
-    margin: 72px 0;
+.Layout main {
+    padding-top: 66px;
+    min-height: calc(100vh - 66px);
 }
 .SpinnerToMiddle {
     display: flex;

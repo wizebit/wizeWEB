@@ -1,69 +1,45 @@
 package main
 
 import (
-	"fmt"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
+	"github.com/astaxie/beego/plugins/cors"
 	_ "github.com/lib/pq"
-	"log"
-	"net/http"
 	"time"
 	"wizebit/backend/models"
-	"wizebit/backend/services"
+	_ "wizebit/backend/routers"
 )
 
-type App struct {
-	ClientPort uint16
-	Router     *mux.Router
-}
-
-// Init web app
-func (a *App) Init() {
-	// Orm initialisation
+func ormInit() {
+	//orm settings
 	orm.RegisterDriver("postgres", orm.DRPostgres)
-
-	var dbConf = services.GetDbConfig()
-
-	dbparams := "user=" + dbConf.User +
-		" password=" + dbConf.Password +
-		" host=" + dbConf.Server +
-		" port=" + dbConf.Port +
-		" dbname=" + dbConf.Name +
+	dbparams := "user=" + beego.AppConfig.String("dbuser") +
+		" password=" + beego.AppConfig.String("dbpassword") +
+		" host=" + beego.AppConfig.String("dbserver") +
+		" port=" + beego.AppConfig.String("dbport") +
+		" dbname=" + beego.AppConfig.String("dbname") +
 		" sslmode=disable"
-
 	orm.RegisterDataBase("default", "postgres", dbparams)
+	orm.Debug = false
+	orm.DefaultTimeLoc = time.UTC
 
+	//orm models
 	orm.RegisterModel(
 		new(models.Users),
 	)
-
-	orm.Debug = false
-	orm.DefaultTimeLoc = time.UTC
-	// Router initialisation
-	a.Router = mux.NewRouter()
-	a.initializeRoutes()
 }
 
-//Run web app
-func (a *App) StartServer() {
-	headers := handlers.AllowedHeaders([]string{"Content-Type"})
-	origins := handlers.AllowedOrigins([]string{"*"})
-	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
-
-	p := fmt.Sprintf("%d", a.ClientPort)
-	fmt.Println("Starting server")
-	fmt.Printf("Running on Port %s\n", p)
-	log.Fatal(http.ListenAndServe(":4001", handlers.CORS(origins, headers, methods)(a.Router)))
+func restSettings() {
+	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
+		AllowAllOrigins: true,
+		AllowMethods:    []string{"GET", "HEAD", "POST", "PUT", "OPTIONS"},
+		AllowHeaders:    []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Content-Type"},
+		ExposeHeaders:   []string{"Content-Length", "Access-Control-Allow-Origin"},
+	}))
 }
 
 func main() {
-	// different Clients can have different ports,
-	// used to connect multiple Clients in debug.
-	ClientPort := uint16(4001)
-	a := App{
-		ClientPort: ClientPort,
-	}
-	a.Init()
-	a.StartServer()
+	restSettings()
+	ormInit()
+	beego.Run()
 }

@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
+import {connect} from 'react-redux';
 import axios from 'axios';
 import FileSaver from 'file-saver';
 import ReCAPTCHA from "react-google-recaptcha";
-
+import * as actions from '../../store/actions/index';
 import classes from './Auth.css';
 import {API_URL} from "../../shared/const";
 import Spinner from '../../components/UI/Spinner/Spinner';
@@ -56,22 +57,7 @@ class Auth extends Component {
 
     onSubmitHandler = (e) => {
         e.preventDefault();
-        const conf = {headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        }};
-
-        this.setState({accData: null, loading: true, error: null});
-
-        axios.post(`${API_URL}/auth/sign-in`, {private_key: this.state.controls.privateKey.value}, conf)
-            .then(response => {
-                this.setState({accData: response.data, loading: false, error: null});
-                console.log(response)
-            })
-            .catch(error => {
-                this.setState({accData: false, loading: false, error: error.response.data.message});
-                console.log(error.response.data.message)
-            })
+        this.props.onAuth(this.state.controls.privateKey.value);
     };
 
     onSignUpHandler = () => {
@@ -95,7 +81,7 @@ class Auth extends Component {
 
     saveAsDocHandler = () => {
         let text = '';
-        Object.keys(this.state.regData).map(key => {text += `${key} : ${this.state.regData[key]}\n`});
+        Object.keys(this.state.regData).map(key => {return text += `${key} : ${this.state.regData[key]}\n`});
         const blob = new Blob([text], {type: "text/plain;charset=utf-8"});
         FileSaver.saveAs(blob, "my-account.txt");
     };
@@ -155,7 +141,9 @@ class Auth extends Component {
                     {Object.keys(this.state.regData).map(key => <p key={key}>
                         {`${key} : ${this.state.regData[key]}`}
                     </p>)}
-                    <Button onClick={() => this.saveAsDocHandler()}>Save as doc</Button>
+                    <Button onClick={() => this.saveAsDocHandler()}>
+                        Save as doc
+                    </Button>
                 </div>
             }
         }
@@ -165,7 +153,8 @@ class Auth extends Component {
                 <div>Sign in</div>
                 <input type="checkbox"
                        checked={this.state.register}
-                       onChange={() => {this.setState({register: !this.state.register})}}/>
+                       onChange={() => {this.setState({register: !this.state.register})}}
+                />
                 <span />
                 <div>Sign up</div>
             </label>
@@ -173,7 +162,7 @@ class Auth extends Component {
             {authForm}
         </div>;
 
-        if (this.state.loading) {
+        if (this.state.loading || this.props.loading) {
             view = <Spinner />
         }
 
@@ -196,4 +185,19 @@ class Auth extends Component {
     }
 }
 
-export default Auth;
+const mapStateToProps = state => {
+    return {
+        token: state.auth.authKey,
+        isAuth: state.auth.authKey !== null,
+        loading: state.auth.loading
+    }
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onAuth: (privateKey) => dispatch(actions.auth(privateKey)),
+        // onLogout:() => dispatch(actions.logout())
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Auth);
