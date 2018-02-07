@@ -1,0 +1,21 @@
+.SidebarList {
+    width: 180px;
+    background-color: rgba(0,0,0,.5);
+    z-index: 904;
+    box-shadow: 2px 0 3px rgba(0,0,0,.5);
+}
+.SidebarList ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.SidebarList ul li {
+    box-shadow: 0 2px 3px rgba(0,0,0,.5);
+    display: block;
+    height: 42px;
+    font-size: 16px;
+    text-decoration: none;
+    line-height: 42px;
+    cursor: pointer;
+    font-family: "Droid Sans", sans-serif;
+}

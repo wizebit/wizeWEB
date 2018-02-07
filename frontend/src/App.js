@@ -7,7 +7,8 @@ import { authCheckState } from './store/actions/index';
 import Auth from './containers/Auth/Auth';
 import Layout from "./hoc/Layout/Layout";
 
-const asyncPersonalArea = asyncComponent(() => import('./containers/PersonalArea/PersonalArea'));
+const asyncIndex = asyncComponent(() => import('./containers/Index/Index'));
+const asyncFiles = asyncComponent(() => import('./containers/Files/Files'));
 
 class App extends Component {
     componentDidMount() {
@@ -23,7 +24,8 @@ class App extends Component {
       if (this.props.isAuth) {
           routes = <Layout>
               <Switch>
-                  <Route exact path="/" component={asyncPersonalArea} />
+                  <Route exact path="/" component={asyncIndex} />
+                  <Route exact path="/upload-files" component={asyncFiles} />
                   <Redirect to="/" />
               </Switch>
           </Layout>
