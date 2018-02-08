@@ -31,7 +31,7 @@ func (a *AuthController) UserSignUp() {
 		beego.Error(err)
 
 		a.Ctx.Output.SetStatus(500)
-		a.Data["json"] = map[string]string{"error": err.Error()}
+		a.Data["json"] = map[string]string{"message": err.Error()}
 		a.ServeJSON()
 		a.StopRun()
 		return
@@ -55,7 +55,7 @@ func (a *AuthController) UserSignUp() {
 		beego.Error(err)
 
 		a.Ctx.Output.SetStatus(500)
-		a.Data["json"] = map[string]string{"error": err.Error()}
+		a.Data["json"] = map[string]string{"message": err.Error()}
 		a.ServeJSON()
 		a.StopRun()
 		return
@@ -79,7 +79,7 @@ func (a *AuthController) UserSignIn() {
 		beego.Error(err)
 
 		a.Ctx.Output.SetStatus(500)
-		a.Data["json"] = map[string]string{"error": err.Error()}
+		a.Data["json"] = map[string]string{"message": err.Error()}
 		a.ServeJSON()
 		a.StopRun()
 		return
@@ -87,7 +87,7 @@ func (a *AuthController) UserSignIn() {
 	//if pk is empty - return error
 	if u.PrivateKey == "" {
 		a.Ctx.Output.SetStatus(400)
-		a.Data["json"] = map[string]string{"error": "Empty private key!"}
+		a.Data["json"] = map[string]string{"message": "Empty private key!"}
 		a.ServeJSON()
 		a.StopRun()
 		return
@@ -104,7 +104,7 @@ func (a *AuthController) UserSignIn() {
 		beego.Error(err)
 
 		a.Ctx.Output.SetStatus(400)
-		a.Data["json"] = map[string]string{"error": err.Error()}
+		a.Data["json"] = map[string]string{"message": err.Error()}
 		a.ServeJSON()
 		a.StopRun()
 		return
@@ -138,7 +138,7 @@ var FilterUser = func(ctx *context.Context) {
 			//fmt.Println(parsedToken.Claims)
 			//fmt.Println((parsedToken.Claims.(jwt.MapClaims)["exp"]).(string) + "~" + (parsedToken.Claims.(jwt.MapClaims)["customerRole"]).(string))
 
-			beego.Info(exp, id)
+			//beego.Info(exp, id)
 			ctx.Input.SetData("exp", exp)
 			ctx.Input.SetData("customerId", id)
 
@@ -147,5 +147,5 @@ var FilterUser = func(ctx *context.Context) {
 	}
 
 	ctx.Output.SetStatus(403)
-	ctx.Output.Body([]byte(`{"error": "Unauthorised access to this resource"}`))
+	ctx.Output.Body([]byte(`{"message": "Unauthorised access to this resource"}`))
 }

@@ -3,7 +3,8 @@ package controllers
 import (
 	"github.com/astaxie/beego"
 	"io/ioutil"
-	"log"
+	"strconv"
+	"os"
 )
 
 type FilesController struct {
@@ -11,19 +12,30 @@ type FilesController struct {
 }
 
 func (f *FilesController) FilesUpload() {
-	//data := f.Ctx.Input.Data()
+	data := f.Ctx.Input.Data()
 
-	//beego.Warn(data["exp"], data["customerId"])
+	id := data["customerId"]
 
-	//id := (data["customerId"]).(string)
-
+	str:= strconv.Itoa(int(id.(float64)))
 	files, err := ioutil.ReadDir("./storage")
 	if err != nil {
-		log.Fatal(err)
+		beego.Error(err)
 	}
 
-	//beego.Warn("id:", id)
+	var fileDirectory string
+
 	for _, file := range files {
-		beego.Warn(file.Name())
+		if file.Name() == str {
+			fileDirectory = file.Name()
+		}
 	}
+
+	if fileDirectory == "" {
+		os.MkdirAll("./storage/"+str, os.ModePerm)
+	}
+
+
+	f.Data["json"] = map[string]string{"message": "success"}
+	f.ServeJSON()
+	f.StopRun()
 }

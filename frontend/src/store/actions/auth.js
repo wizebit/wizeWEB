@@ -44,6 +44,7 @@ export const auth = (privateKey) => {
               dispatch(checkAuthTimeout(response.data.expires_in));
           })
           .catch(error => {
+              console.log(error.response);
               dispatch(authFail(error.response.data));
           });
   };
