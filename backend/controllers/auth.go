@@ -112,7 +112,7 @@ func (a *AuthController) UserSignIn() {
 
 	token, expiresIn, err := services.CreateSignedTokenString(us.Id)
 	a.Data["json"] = map[string]interface{}{
-		"auth_key": token,
+		"auth_key":   token,
 		"expires_in": expiresIn,
 	}
 	a.ServeJSON()
@@ -134,11 +134,6 @@ var FilterUser = func(ctx *context.Context) {
 			exp := parsedToken.Claims.(jwt.MapClaims)["exp"]
 			id := parsedToken.Claims.(jwt.MapClaims)["customerId"]
 
-			//token:=parsedToken.Claims["exp"]
-			//fmt.Println(parsedToken.Claims)
-			//fmt.Println((parsedToken.Claims.(jwt.MapClaims)["exp"]).(string) + "~" + (parsedToken.Claims.(jwt.MapClaims)["customerRole"]).(string))
-
-			//beego.Info(exp, id)
 			ctx.Input.SetData("exp", exp)
 			ctx.Input.SetData("customerId", id)
 
