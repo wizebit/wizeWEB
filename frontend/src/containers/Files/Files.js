@@ -18,7 +18,7 @@ class Files extends Component {
         let data = new FormData();
         data.append('file', file);
 
-        let config = {
+        const config = {
             onUploadProgress: progressEvent => {
                 let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
                 // do whatever you like with the percentage complete

@@ -110,7 +110,7 @@ func (a *AuthController) UserSignIn() {
 		return
 	}
 
-	token, expiresIn, err := services.CreateSignedTokenString(us.Id)
+	token, expiresIn, err := services.CreateSignedTokenString(us.PublicKey)
 	a.Data["json"] = map[string]interface{}{
 		"auth_key":   token,
 		"expires_in": expiresIn,
@@ -132,10 +132,10 @@ var FilterUser = func(ctx *context.Context) {
 
 		if err == nil && parsedToken.Valid {
 			exp := parsedToken.Claims.(jwt.MapClaims)["exp"]
-			id := parsedToken.Claims.(jwt.MapClaims)["customerId"]
+			publicKey := parsedToken.Claims.(jwt.MapClaims)["publicKey"]
 
 			ctx.Input.SetData("exp", exp)
-			ctx.Input.SetData("customerId", id)
+			ctx.Input.SetData("publicKey", publicKey)
 
 			return
 		}

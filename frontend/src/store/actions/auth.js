@@ -45,7 +45,7 @@ export const auth = (privateKey) => {
           })
           .catch(error => {
               console.log(error.response);
-              dispatch(authFail(error.response.data));
+              dispatch(authFail(error));
           });
   };
 };

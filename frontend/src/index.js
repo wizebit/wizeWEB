@@ -30,3 +30,5 @@ const app = (
 
 ReactDOM.render(app, document.getElementById('root'));
 registerServiceWorker();
+
+// TODO: change hash router on router

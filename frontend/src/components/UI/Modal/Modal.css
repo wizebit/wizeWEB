@@ -42,6 +42,8 @@
     overflow-y: auto !important;
     overflow-x: hidden !important;
     padding: 30px;
+    color: black;
+    text-align: center;
 }
 @media (max-width: 767px) {
     .Modal {

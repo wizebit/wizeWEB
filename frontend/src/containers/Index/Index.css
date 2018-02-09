@@ -1,0 +1,16 @@
+.FilesList {
+    list-style: none;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+.FilesList li {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+.FilesList li > span {
+    width: 25%;
+}

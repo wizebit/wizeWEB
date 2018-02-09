@@ -21,7 +21,7 @@ const (
 
 //AUTH TOKEN CREATE
 
-func CreateSignedTokenString(id int) (string, int, error) {
+func CreateSignedTokenString(publicKey string) (string, int, error) {
 	//read private key
 	privateKey, err := ioutil.ReadFile(privKey)
 	if err != nil {
@@ -36,8 +36,8 @@ func CreateSignedTokenString(id int) (string, int, error) {
 	expiresIn := 1200
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-		"exp":          time.Now().Add(time.Second * 1200).Unix(),
-		"customerId": id,
+		"exp": time.Now().Add(time.Second * 1200).Unix(),
+		"publicKey": publicKey,
 	})
 
 	tokenString, err := token.SignedString(key)
