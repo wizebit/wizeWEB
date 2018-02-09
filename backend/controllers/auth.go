@@ -21,6 +21,16 @@ type User struct {
 	PrivateKey string `json:"private_key"`
 }
 
+func (a *AuthController) responseWithError(status int, message map[string]string, err interface{}) {
+	beego.Error(err)
+
+	a.Ctx.Output.SetStatus(status)
+	a.Data["json"] = message
+	a.ServeJSON()
+	a.StopRun()
+	return
+}
+
 //on user sign up (registration)
 func (a *AuthController) UserSignUp() {
 	KoblitzCurve := curve.S256() // see https://godoc.org/github.com/btcsuite/btcd/btcec#S256
@@ -28,12 +38,8 @@ func (a *AuthController) UserSignUp() {
 	privkey, err := curve.NewPrivateKey(KoblitzCurve)
 
 	if err != nil {
-		beego.Error(err)
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
-		a.Ctx.Output.SetStatus(500)
-		a.Data["json"] = map[string]string{"message": err.Error()}
-		a.ServeJSON()
-		a.StopRun()
 		return
 	}
 
@@ -52,12 +58,8 @@ func (a *AuthController) UserSignUp() {
 	_, err = o.Insert(u)
 
 	if err != nil {
-		beego.Error(err)
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
-		a.Ctx.Output.SetStatus(500)
-		a.Data["json"] = map[string]string{"message": err.Error()}
-		a.ServeJSON()
-		a.StopRun()
 		return
 	}
 
@@ -76,20 +78,14 @@ func (a *AuthController) UserSignIn() {
 	json.Unmarshal(a.Ctx.Input.RequestBody, &u)
 	//parse body
 	if err := a.ParseForm(&u); err != nil {
-		beego.Error(err)
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
-		a.Ctx.Output.SetStatus(500)
-		a.Data["json"] = map[string]string{"message": err.Error()}
-		a.ServeJSON()
-		a.StopRun()
 		return
 	}
 	//if pk is empty - return error
 	if u.PrivateKey == "" {
-		a.Ctx.Output.SetStatus(400)
-		a.Data["json"] = map[string]string{"message": "Empty private key!"}
-		a.ServeJSON()
-		a.StopRun()
+		a.responseWithError(500, map[string]string{"message": "Empty private key!"}, "Auth: empty private key!")
+
 		return
 	}
 
@@ -101,12 +97,8 @@ func (a *AuthController) UserSignIn() {
 	err := o.QueryTable("users").Filter("private_key", services.GetHash(u.PrivateKey)).Limit(1).One(&us)
 
 	if err != nil {
-		beego.Error(err)
+		a.responseWithError(400, map[string]string{"message": err.Error()}, err)
 
-		a.Ctx.Output.SetStatus(400)
-		a.Data["json"] = map[string]string{"message": err.Error()}
-		a.ServeJSON()
-		a.StopRun()
 		return
 	}
 

@@ -52,9 +52,7 @@ export const auth = (privateKey) => {
 
 export const checkAuthTimeout = (expirationTime) => {
     return dispatch => {
-        setTimeout(() => {
-            dispatch(logout());
-        }, expirationTime * 1000)
+        setTimeout(() => dispatch(logout()), expirationTime * 1000)
     }
 };
 

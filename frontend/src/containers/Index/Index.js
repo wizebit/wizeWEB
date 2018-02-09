@@ -13,7 +13,8 @@ class Index extends Component {
         files: null,
         loading: false,
         error: null,
-        modalContent: null
+        modalContent: null,
+        transferTo: null
     };
 
     componentDidMount() {
@@ -31,9 +32,43 @@ class Index extends Component {
 
         axios.get(`${API_URL}/api/get-file-list`, config)
             .then(response => {
-                this.setState({files: response.data.users_files ? response.data.users_files : [], loading: false}
+                this.setState({files: response.data.userFiles ? response.data.userFiles : [], loading: false}
             )})
             .catch(error => this.setState({error: error.response.data.message, loading: false}))
+    };
+
+    downloadFileHandler = (relativePath, filename) => {
+        this.setState({loading: true});
+
+        const config = {
+            params: {
+              file: filename
+            },
+            headers: {
+                'Authorization': this.props.token
+            }
+        };
+
+        axios.get(`${API_URL}/api/download-file`, config)
+            .then(response => {
+                console.log(response.data);
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+
+                // window.open(response.data.file);
+                // this.setState({loading: false});
+            })
+            .catch(error => {
+                console.log(error.response)
+                // this.setState({
+                //     error: error.response.data.message,
+                //     loading: false
+                // });
+            });
     };
 
     onDeleteHandler = (filename) => {
@@ -48,7 +83,8 @@ class Index extends Component {
 
         axios.post(`${API_URL}/api/delete-file`, {filename: filename}, config)
             .then(response => {
-                this.setState({files: response.data.users_files, loading: false});
+                console.log(response.data.message);
+                this.setState({loading: false});
                 this.getFilesHandler();
                 this.modalCloseHandler();
             })
@@ -62,7 +98,7 @@ class Index extends Component {
             })
     };
 
-    showModalHandler = (date, name) => {
+    showDeleteModalHandler = (date, name) => {
         this.setState({
             modalContent: <div>
                 <p>Are you sure?</p>
@@ -70,6 +106,50 @@ class Index extends Component {
             </div>
         });
     };
+
+    onTransferHandler = (filename) => {
+        console.log({filename: filename, transfer_to: this.state.transferTo});
+        this.setState({loading: true});
+
+        const config = {
+            headers: {
+                'Authorization': this.props.token
+            }
+        };
+
+        axios.post(`${API_URL}/api/transfer-file`, {filename: filename, transferTo: this.state.transferTo}, config)
+            .then(response => {
+                console.log(response.data.message);
+                this.setState({loading: false});
+                this.getFilesHandler();
+                this.modalCloseHandler();
+            })
+            .catch(error => {
+                this.setState({
+                    error: error.response.data.message,
+                    modalContent: <p>{error.response.data.message}</p>,
+                    loading: false
+                });
+                this.modalCloseHandler();
+            })
+    };
+
+    showTransferModalHandler = (date, name) => {
+        this.setState({
+            modalContent: <div>
+                <div>
+                    <label htmlFor="transferTO">Enter public key of user, who will own this file.</label>
+                    <input
+                        type="text"
+                        id="transferTO"
+                        onChange={(e) => this.setState({transferTo: e.target.value})}
+                    />
+                </div>
+                <Button onClick={() => this.onTransferHandler(date+"~"+name)}>Ok</Button>
+            </div>
+        });
+    };
+
 
     modalCloseHandler = () => {
         this.setState({modalContent: null});
@@ -86,22 +166,32 @@ class Index extends Component {
                         <span>Upload Date</span>
                         <span>&nbsp;</span>
                         <span>&nbsp;</span>
+                        <span>&nbsp;</span>
                     </li>
                     {
                         this.state.files.map((file, index) => <li key={index}>
                             <span>{file.name}</span>
-                            <span>{new Date(file.upload_date * 1000).toString()}</span>
+                            <span>{new Date(file.uploadDate * 1000).toString()}</span>
                             <span>
-                            <Button
-                                onClick={() => this.showModalHandler(file.upload_date, file.name)}
-                            >
-                                Delete
-                            </Button>
-                        </span>
+                                <Button
+                                    onClick={() => this.downloadFileHandler(file.relativePath, file.uploadDate+"~"+file.name)}
+                                >
+                                    Download
+                                </Button>
+                            </span>
                             <span>
-                            <Button>
-                                Transfer file
-                            </Button>
+                                <Button
+                                    onClick={() => this.showDeleteModalHandler(file.uploadDate, file.name)}
+                                >
+                                    Delete
+                                </Button>
+                            </span>
+                            <span>
+                                <Button
+                                    onClick={() => this.showTransferModalHandler(file.uploadDate, file.name)}
+                                >
+                                    Transfer file
+                                </Button>
                         </span>
                         </li>)
                     }

@@ -2,8 +2,8 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
-	"wizebit/backend/controllers"
 	"github.com/astaxie/beego/plugins/cors"
+	"wizebit/backend/controllers"
 )
 
 func init() {
@@ -15,14 +15,14 @@ func init() {
 	//
 	//	Admin panel
 
-
 	//	Auth requests
 	//
 	//	API
-	//beego.Router("/api/root", &controllers.ApiController{}, "post:Index")
 	beego.Router("/api/get-file-list", &controllers.ApiController{}, "get:GetFileList")
 	beego.Router("/api/upload-file", &controllers.ApiController{}, "put:UploadFile")
+	beego.Router("/api/download-file", &controllers.ApiController{}, "get:DownloadFile")
 	beego.Router("/api/delete-file", &controllers.ApiController{}, "post:DeleteFile")
+	beego.Router("/api/transfer-file", &controllers.ApiController{}, "post:TransferFile")
 	//
 	//	Admin panel
 
