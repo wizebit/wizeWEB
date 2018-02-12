@@ -29,6 +29,10 @@ func ormInit() {
 }
 
 func main() {
+	//public storage
+	beego.SetStaticPath("/storage", "storage")
+	//orm initiation
 	ormInit()
+	//beego run action
 	beego.Run()
 }

@@ -20,9 +20,9 @@ func init() {
 	//	API
 	beego.Router("/api/get-file-list", &controllers.ApiController{}, "get:GetFileList")
 	beego.Router("/api/upload-file", &controllers.ApiController{}, "put:UploadFile")
-	beego.Router("/api/download-file", &controllers.ApiController{}, "get:DownloadFile")
 	beego.Router("/api/delete-file", &controllers.ApiController{}, "post:DeleteFile")
 	beego.Router("/api/transfer-file", &controllers.ApiController{}, "post:TransferFile")
+	// Bug report
 	//
 	//	Admin panel
 

@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 	"wizebit/backend/services"
-	"net/http"
 )
 
 type ApiController struct {
@@ -35,7 +34,7 @@ func (a *ApiController) responseWithError(status int, message map[string]string,
 
 func (a *ApiController) GetFileList() {
 	data := a.Ctx.Input.Data()
-	publicKey := data["publicKey"].(string)
+	publicKey := services.Trim(data["publicKey"].(string))
 
 	//	find our user folder
 	if _, err := os.Stat("./storage/" + publicKey); os.IsNotExist(err) {
@@ -93,7 +92,7 @@ func (a *ApiController) UploadFile() {
 
 	//	get our user id
 	data := a.Ctx.Input.Data()
-	publicKey := data["publicKey"].(string)
+	publicKey := services.Trim(data["publicKey"].(string))
 	//idStr := strconv.Itoa(int(id.(float64)))
 
 	//	find our user folder
@@ -129,7 +128,7 @@ func (a *ApiController) UploadFile() {
 
 func (a *ApiController) DeleteFile() {
 	data := a.Ctx.Input.Data()
-	publicKey := data["publicKey"].(string)
+	publicKey := services.Trim(data["publicKey"].(string))
 
 	//get body of request
 	req := FileRequest{}
@@ -161,65 +160,9 @@ func (a *ApiController) DeleteFile() {
 	a.StopRun()
 }
 
-func (a *ApiController) DownloadFile() {
-	data := a.Ctx.Input.Data()
-	publicKey := data["publicKey"].(string)
-	filename := a.GetString("file")
-
-	dir, err := os.Getwd()
-	if err != nil {
-		beego.Error(err)
-	}
-	beego.Warn(dir)
-
-	file, _, err := a.GetFile("./storage"+publicKey+"/"+filename)
-	if err != nil {
-		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
-
-		return
-	}
-
-	//Check if file exists and open
-	//Openfile, err := os.Open("./storage/"+publicKey+"/"+filename)
-	//defer Openfile.Close() //Close after function return
-	//if err != nil {
-	//	//File not found, send 400
-	//	a.responseWithError(400, map[string]string{"message": err.Error()}, err)
-	//
-	//	return
-	//}
-	//
-	////File is found, create and send the correct headers
-	//
-	////Get the Content-Type of the file
-	////Create a buffer to store the header of the file in
-	//FileHeader := make([]byte, 512)
-	////Copy the headers into the FileHeader buffer
-	//Openfile.Read(FileHeader)
-	////Get content type of file
-	//FileContentType := http.DetectContentType(FileHeader)
-	//
-	////Get the file size
-	//FileStat, _ := Openfile.Stat()                     //Get info from file
-	//FileSize := strconv.FormatInt(FileStat.Size(), 10) //Get file size as a string
-	//
-	////Send the headers
-	//a.Ctx.Output.Header("Content-Disposition", "attachment; filename="+filename)
-	//a.Ctx.Output.Header("Content-Type", FileContentType)
-	//a.Ctx.Output.Header("Content-Length", FileSize)
-	//
-	//var file io.Writer
-	//
-	//io.Copy(file, Openfile)
-
-	a.Data["json"] = map[string]interface{}{"file": file}
-	a.ServeJSON()
-	a.StopRun()
-}
-
 func (a *ApiController) TransferFile() {
 	data := a.Ctx.Input.Data()
-	publicKey := data["publicKey"].(string)
+	publicKey := services.Trim(data["publicKey"].(string))
 
 	//	get body of request
 	req := FileRequest{}

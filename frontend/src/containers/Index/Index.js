@@ -38,37 +38,12 @@ class Index extends Component {
     };
 
     downloadFileHandler = (relativePath, filename) => {
-        this.setState({loading: true});
-
-        const config = {
-            params: {
-              file: filename
-            },
-            headers: {
-                'Authorization': this.props.token
-            }
-        };
-
-        axios.get(`${API_URL}/api/download-file`, config)
-            .then(response => {
-                console.log(response.data);
-                const url = window.URL.createObjectURL(new Blob([response.data]));
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', filename);
-                document.body.appendChild(link);
-                link.click();
-
-                // window.open(response.data.file);
-                // this.setState({loading: false});
-            })
-            .catch(error => {
-                console.log(error.response)
-                // this.setState({
-                //     error: error.response.data.message,
-                //     loading: false
-                // });
-            });
+        // const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = API_URL+relativePath;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
     };
 
     onDeleteHandler = (filename) => {
