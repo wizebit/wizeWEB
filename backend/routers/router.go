@@ -3,7 +3,7 @@ package routers
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/plugins/cors"
-	"wizebit/backend/controllers"
+	"wizeweb/backend/controllers"
 )
 
 func init() {

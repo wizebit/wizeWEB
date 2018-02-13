@@ -5,8 +5,8 @@ import (
 	"github.com/astaxie/beego/orm"
 	_ "github.com/lib/pq"
 	"time"
-	"wizebit/backend/models"
-	_ "wizebit/backend/routers"
+	"wizeweb/backend/models"
+	_ "wizeweb/backend/routers"
 )
 
 func ormInit() {

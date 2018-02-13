@@ -8,8 +8,8 @@ import (
 	"github.com/coin-network/curve"
 	"github.com/dgrijalva/jwt-go"
 	"strings"
-	"wizebit/backend/models"
-	"wizebit/backend/services"
+	"wizeweb/backend/models"
+	"wizeweb/backend/services"
 )
 
 type AuthController struct {

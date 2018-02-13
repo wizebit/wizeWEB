@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"wizebit/backend/services"
+	"wizeweb/backend/services"
 )
 
 type ApiController struct {
