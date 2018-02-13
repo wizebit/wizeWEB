@@ -2,6 +2,7 @@
     padding-top: 66px;
     min-height: calc(100vh - 66px);
     display: flex;
+    position: relative;
 }
 .Layout main article {
     width: calc(100vw - 180px);

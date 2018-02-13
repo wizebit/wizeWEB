@@ -4,6 +4,7 @@ import Aux from '../Aux/Aux';
 import classes from './Layout.css';
 import Header from '../../components/Header/Header';
 import SidebarList from '../../components/SidebarList/SidebarList';
+import BugReport from '../../containers/BugReport/BugReport';
 
 class Layout extends Component {
     render () {
@@ -18,6 +19,8 @@ class Layout extends Component {
                             {this.props.children}
                         </article>
                     </main>
+
+                    <BugReport />
                 </div>
             </Aux>
         )

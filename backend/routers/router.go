@@ -23,7 +23,8 @@ func init() {
 	beego.Router("/api/delete-file", &controllers.ApiController{}, "post:DeleteFile")
 	beego.Router("/api/transfer-file", &controllers.ApiController{}, "post:TransferFile")
 	// Bug report
-	//
+	beego.Router("/api/report-bug", &controllers.ReportController{}, "post:GetReport")
+
 	//	Admin panel
 
 	//

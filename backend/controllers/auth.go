@@ -114,7 +114,7 @@ func (a *AuthController) UserSignIn() {
 // customize filters for fine grain authorization
 var FilterUser = func(ctx *context.Context) {
 	//Unauthorised requests
-	if strings.HasPrefix(ctx.Input.URL(), "/auth") || strings.HasPrefix(ctx.Input.URL(), "/storage"){
+	if strings.HasPrefix(ctx.Input.URL(), "/auth") || strings.HasPrefix(ctx.Input.URL(), "/storage") {
 		return
 	}
 

@@ -69,8 +69,8 @@ func (a *ApiController) GetFileList() {
 		}
 
 		fileObject := map[string]string{
-			"name":        name,
-			"uploadDate": date,
+			"name":         name,
+			"uploadDate":   date,
 			"relativePath": rel,
 		}
 		filesSlice = append(filesSlice, fileObject)
@@ -190,7 +190,7 @@ func (a *ApiController) TransferFile() {
 	exist := o.QueryTable("users").Filter("publicKey", services.GetHash(req.TransferTo)).Exist()
 	if !exist {
 		a.responseWithError(400, map[string]string{"message": "there is no such user"},
-		"Transfer file: there is no such user")
+			"Transfer file: there is no such user")
 
 		return
 	}

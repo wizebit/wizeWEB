@@ -16,3 +16,12 @@ type Users struct {
 	UpdatedAt  time.Time `orm:"column(updated_at);type(timestamp);auto_now"`
 	Salt       string
 }
+
+type BugReports struct {
+	Id        int `orm:"pk;column(id);auto"`
+	UserId    int `orm:"column(user_id)"`
+	Message   string
+	Picture   string
+	CreatedAt time.Time `orm:"column(created_at);type(timestamp);auto_now_add"`
+	UpdatedAt time.Time `orm:"column(updated_at);type(timestamp);auto_now"`
+}

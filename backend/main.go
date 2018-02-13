@@ -25,6 +25,7 @@ func ormInit() {
 	//orm models
 	orm.RegisterModel(
 		new(models.Users),
+		new(models.BugReports),
 	)
 }
 
