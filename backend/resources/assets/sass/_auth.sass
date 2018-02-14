@@ -1,0 +1,46 @@
+.auth-wrapper
+  min-height: 100vh
+  display: flex
+  justify-content: center
+  align-items: center
+
+  .form-wrapper
+    form
+      width: 500px
+      padding: 30px
+      border: 1px solid $blue
+      box-sizing: border-box
+
+      @media (max-width: 500px)
+        width: 100%
+
+      h2
+        color: $blue
+        margin: 0 0 12px
+        width: 100%
+        text-align: center
+      .form-group
+        input
+          &[type="text"]
+            background-color: transparent
+            border-color: $blue
+            color: $blue
+
+            &::placeholder
+              color: $blue
+          &[type="submit"]
+            background-color: $blue
+            font-weight: 700
+
+            &:hover, &:active
+              background-color: $light-blue
+
+        &:last-child
+          text-align: right
+          margin-bottom: 0
+      .invalid-feedback
+        color: $red
+        width: 100%
+        text-align: right
+        margin-top: 7.5px
+        margin-bottom: -7.5px

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/astaxie/beego/session"
 	_ "github.com/lib/pq"
 	"time"
 	"wizeweb/backend/models"
@@ -29,9 +30,21 @@ func ormInit() {
 	)
 }
 
+func sessionInit() {
+	var globalSessions *session.Manager
+	sessionConfig := &session.ManagerConfig{
+		CookieName: "jigsessionid",
+		Gclifetime: 3600,
+	}
+	globalSessions, _ = session.NewManager("memory", sessionConfig)
+	go globalSessions.GC()
+}
+
 func main() {
 	//public storage
 	beego.SetStaticPath("/storage", "storage")
+	//session initiation
+	sessionInit()
 	//orm initiation
 	ormInit()
 	//beego run action

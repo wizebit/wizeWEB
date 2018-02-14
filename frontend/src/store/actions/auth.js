@@ -40,8 +40,9 @@ export const auth = (privateKey) => {
               localStorage.setItem('wise-bit-auth-key', response.data.auth_key);
               localStorage.setItem('wise-bit-auth-key-expiration-date', expirationDate);
 
-              dispatch(authSuccess(response.data));
               dispatch(checkAuthTimeout(response.data.expires_in));
+
+              dispatch(authSuccess(response.data));
           })
           .catch(error => {
               console.log(error.response);
@@ -52,7 +53,7 @@ export const auth = (privateKey) => {
 
 export const checkAuthTimeout = (expirationTime) => {
     return dispatch => {
-        setTimeout(() => dispatch(logout()), expirationTime * 1000)
+        setTimeout(() => {dispatch(logout());}, expirationTime * 1000)
     }
 };
 
@@ -68,8 +69,8 @@ export const authCheckState = () => {
           if (expirationDate <= new Date()) {
               dispatch(logout());
           } else {
-              dispatch(authSuccess({auth_key: authKey}));
               dispatch(checkAuthTimeout(expirationDate.getTime() - new Date().getTime()));
+              dispatch(authSuccess({auth_key: authKey}));
           }
       }
   }

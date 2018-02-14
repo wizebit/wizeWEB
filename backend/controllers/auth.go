@@ -16,9 +16,16 @@ type AuthController struct {
 	beego.Controller
 }
 
-//login json form will have structure
+var sessionName = beego.AppConfig.String("SessionName")
+
+//	login json form will have structure
 type User struct {
 	PrivateKey string `json:"private_key"`
+}
+
+//	auth form for admin panel
+type Admin struct {
+	PrivateKey string `form:"private_key"`
 }
 
 func (a *AuthController) responseWithError(status int, message map[string]string, err interface{}) {
@@ -28,10 +35,11 @@ func (a *AuthController) responseWithError(status int, message map[string]string
 	a.Data["json"] = message
 	a.ServeJSON()
 	a.StopRun()
+
 	return
 }
 
-//on user sign up (registration)
+//	API sign up (registration)
 func (a *AuthController) UserSignUp() {
 	KoblitzCurve := curve.S256() // see https://godoc.org/github.com/btcsuite/btcd/btcec#S256
 
@@ -71,7 +79,7 @@ func (a *AuthController) UserSignUp() {
 	a.ServeJSON()
 }
 
-//on user sign in (login)
+//	API sign in (login)
 func (a *AuthController) UserSignIn() {
 	//get body of request
 	u := User{}
@@ -111,6 +119,54 @@ func (a *AuthController) UserSignIn() {
 	a.StopRun()
 }
 
+//	admin sign in
+func (a *AuthController) AdminAuth() {
+	a.TplName = "auth/index.tpl"
+}
+func (a *AuthController) AdminSignIn() {
+	adm := Admin{}
+	if err := a.ParseForm(&adm); err != nil {
+		beego.Error(err)
+		a.Data["errorMessage"] = err.Error()
+	}
+
+	if adm.PrivateKey == "" {
+		beego.Error("Your private key is empty")
+		a.Data["errorMessage"] = "Your private key is empty"
+		a.TplName = "auth/index.tpl"
+		return
+	}
+
+	var u models.Users
+
+	o := orm.NewOrm()
+	o.Using("default")
+	//find user
+	err := o.QueryTable("users").Filter("private_key", services.GetHash(adm.PrivateKey)).Limit(1).One(&u)
+
+	if err != nil {
+		beego.Error(err)
+		a.Data["errorMessage"] = err.Error()
+		a.TplName = "auth/index.tpl"
+		return
+	}
+
+	if u.Role == 0 {
+		v := a.GetSession(sessionName)
+		if v == nil {
+			a.SetSession(sessionName, u.PublicKey)
+		}
+		a.Redirect("/admin", 302)
+	}
+
+	a.Data["errorMessage"] = "Unauthorised access to this resource"
+	a.TplName = "auth/index.tpl"
+}
+func (a *AuthController) AdminSignOut() {
+	a.DelSession(sessionName)
+	a.Redirect("/", 302)
+}
+
 // customize filters for fine grain authorization
 var FilterUser = func(ctx *context.Context) {
 	//Unauthorised requests
@@ -130,6 +186,26 @@ var FilterUser = func(ctx *context.Context) {
 			ctx.Input.SetData("publicKey", publicKey)
 
 			return
+		}
+	}
+
+	if strings.HasPrefix(ctx.Input.URL(), "/admin") {
+		_, ok := ctx.Input.Session(sessionName).(string)
+
+		if ok {
+			var u models.Users
+			o := orm.NewOrm()
+			o.Using("default")
+			//find user
+			err := o.QueryTable("users").Filter("public_key", ctx.Input.Session(sessionName).(string)).Limit(1).One(&u)
+
+			if err == nil && u.Role == 0 {
+				return
+			} else {
+				ctx.Redirect(302, "/auth/admin")
+			}
+		} else {
+			ctx.Redirect(302, "/auth/admin")
 		}
 	}
 
