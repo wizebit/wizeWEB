@@ -7,8 +7,10 @@ import { authCheckState } from './store/actions/index';
 import Auth from './containers/Auth/Auth';
 import Layout from "./hoc/Layout/Layout";
 
-const asyncIndex = asyncComponent(() => import('./containers/Index/Index'));
-const asyncFiles = asyncComponent(() => import('./containers/Files/Files'));
+const asyncFilesList = asyncComponent(() => import('./containers/FilesList/FilesList'));
+const asyncFileUpload = asyncComponent(() => import('./containers/FileUpload/FileUpload'));
+const asyncWalletsList = asyncComponent(() => import('./containers/WalletsList/WalletsList'));
+const asyncWalletCheck = asyncComponent(() => import('./containers/WalletCheck/WalletCheck'));
 
 class App extends Component {
     componentDidMount() {
@@ -24,8 +26,10 @@ class App extends Component {
       if (this.props.isAuth) {
           routes = <Layout>
               <Switch>
-                  <Route exact path="/" component={asyncIndex} />
-                  <Route exact path="/upload-files" component={asyncFiles} />
+                  <Route exact path="/" component={asyncFilesList} />
+                  <Route exact path="/upload-files" component={asyncFileUpload} />
+                  <Route exact path="/wallets-list" component={asyncWalletsList} />
+                  <Route exact path="/wallet-check" component={asyncWalletCheck} />
                   <Redirect to="/" />
               </Switch>
           </Layout>

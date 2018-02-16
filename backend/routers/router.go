@@ -20,12 +20,16 @@ func init() {
 	//	Auth requests
 	//
 	//	API
-	beego.Router("/api/get-file-list", &controllers.ApiController{}, "get:GetFileList")
+	//	Files
+	beego.Router("/api/get-files-list", &controllers.ApiController{}, "get:GetFilesList")
 	beego.Router("/api/upload-file", &controllers.ApiController{}, "put:UploadFile")
 	beego.Router("/api/delete-file", &controllers.ApiController{}, "post:DeleteFile")
 	beego.Router("/api/transfer-file", &controllers.ApiController{}, "post:TransferFile")
 	// Bug report
 	beego.Router("/api/report-bug", &controllers.ReportController{}, "post:GetReport")
+	//	Wallets
+	beego.Router("/api/get-wallets-list", &controllers.WalletController{}, "get:WalletsList")
+	beego.Router("/api/wallet/:walletNumber", &controllers.WalletController{}, "get:WalletCheck")
 
 	//	Admin panel
 	beego.Router("/admin", &controllers.AdminController{}, "get:Index")

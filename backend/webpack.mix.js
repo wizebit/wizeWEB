@@ -23,4 +23,4 @@ mix.sass('resources/assets/sass/app.sass', 'static/css');
 
 mix.combine(['resources/assets/js/*'], 'static/js/app.js');
 
-mix.browserSync('localhost:8080');
+// mix.browserSync('localhost:8080');

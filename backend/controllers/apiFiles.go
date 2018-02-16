@@ -32,7 +32,7 @@ func (a *ApiController) responseWithError(status int, message map[string]string,
 	return
 }
 
-func (a *ApiController) GetFileList() {
+func (a *ApiController) GetFilesList() {
 	data := a.Ctx.Input.Data()
 	publicKey := services.Trim(data["publicKey"].(string))
 

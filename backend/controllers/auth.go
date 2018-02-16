@@ -77,6 +77,25 @@ func (a *AuthController) UserSignUp() {
 		"wallet":      address,
 	}
 	a.ServeJSON()
+	a.StopRun()
+
+	//TODO: NEW PRIVATE KEY/ADDRESS/PUB KEY GENERATION
+
+	//var w *wallet.Wallet
+	//
+	//w = wallet.NewWallet()
+	//
+	//beego.Warn(w.PublicKey)
+	//beego.Info(w.PrivateKey)
+	//beego.Warn(w.GetAddress())
+	//
+	//a.Data["json"] = map[string]interface{}{
+	//	"private_key": "hello world",
+	//	"public_key": "hello world",
+	//	"wallet": "hello world",
+	//}
+	//a.ServeJSON()
+	//a.StopRun()
 }
 
 //	API sign in (login)
