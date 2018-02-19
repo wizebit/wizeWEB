@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import axios from 'axios';
 import FileSaver from 'file-saver';
-import ReCAPTCHA from "react-google-recaptcha";
 import * as actions from '../../store/actions/index';
 import classes from './Auth.css';
 import {API_URL} from "../../shared/const";
@@ -15,8 +14,6 @@ import Modal from '../../components/UI/Modal/Modal';
 
 
 class Auth extends Component {
-    captcha;
-
     state = {
         register: false,
         loading: false,
@@ -24,11 +21,11 @@ class Auth extends Component {
         accData: null,
         regData: null,
         controls: {
-            privateKey: {
+            publicKey: {
                 elementType: 'input',
                 elementConfig: {
                     type: 'text',
-                    placeholder: 'Private Key'
+                    placeholder: 'Public Key'
                 },
                 value: '',
                 validation: {
@@ -38,6 +35,21 @@ class Auth extends Component {
                 touched: false,
                 errorMessage: null
             },
+            aesKey: {
+                elementType: 'input',
+                elementConfig: {
+                    type: 'text',
+                    placeholder: 'Password'
+                },
+                value: '',
+                validation: {
+                    required: true,
+                    length: 32,
+                },
+                valid: false,
+                touched: false,
+                errorMessage: null
+            }
         }
     };
 
@@ -55,12 +67,17 @@ class Auth extends Component {
         this.setState({controls: updatedControls});
     };
 
-    onSubmitHandler = (e) => {
-        e.preventDefault();
-        this.props.onAuth(this.state.controls.privateKey.value);
+    onSignInHandler = (e) => {
+        if (this.state.controls.publicKey.valid && this.state.controls.aesKey.valid) {
+            e.preventDefault();
+            this.props.onAuth(
+                this.state.controls.publicKey.value,
+                this.state.controls.aesKey.value
+            );
+        }
     };
 
-    onSignUpHandler = () => {
+    onPreSignUpHandler = () => {
         const conf = {headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -68,7 +85,7 @@ class Auth extends Component {
 
         this.setState({regData: null, loading: true, error: null});
 
-        axios.post(`${API_URL}/auth/sign-up`, {}, conf)
+        axios.post(`${API_URL}/auth/pre-sign-up`, {}, conf)
             .then(response => {
                 this.setState({regData: response.data, loading: false, error: null});
                 console.log(response)
@@ -77,6 +94,32 @@ class Auth extends Component {
                 this.setState({regData: false, loading: false, error: error.response.data.message});
                 console.log(error.response.data.message)
             })
+    };
+
+    onSignUpHandler = () => {
+        if (this.state.controls.aesKey.valid) {
+            const conf = {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            const data = {
+                ...this.state.regData,
+                aesKey: this.state.controls.aesKey.value
+            };
+
+            axios.post(`${API_URL}/auth/sign-up`, data, conf)
+                .then(response => {
+                    this.setState({regData: response.data, loading: false, error: null});
+                    console.log(response)
+                })
+                .catch(error => {
+                    this.setState({regData: false, loading: false, error: error.response.data.message});
+                    console.log(error.response.data.message)
+                })
+        }
     };
 
     saveAsDocHandler = () => {
@@ -100,7 +143,7 @@ class Auth extends Component {
             } );
         }
 
-        let authForm = <form  className={classes.AuthForm} onSubmit={this.onSubmitHandler}>
+        let authForm = <form  className={classes.AuthForm} onSubmit={this.onSignInHandler}>
             {
                 formElementsArray.map(
                     formElement => <Input
@@ -122,14 +165,8 @@ class Auth extends Component {
 
         if (this.state.register) {
             if (!this.state.regData) {
-                authForm = <form className={classes.AuthForm} onSubmit={(e) => {e.preventDefault(); this.captcha.execute(); this.onSignUpHandler()}}>
-                    <ReCAPTCHA
-                        ref="recaptcha"
-                        size="invisible"
-                        sitekey="6LfBAUQUAAAAAJi3xgNGMvz50-R5F2iTMgpW9J2q"
-                        onChange={() =>{}}
-                    />
-                    <Button onClick={() => this.onSignUpHandler()}>Sign up</Button>
+                authForm = <form className={classes.AuthForm} onSubmit={() => this.onSignUpHandler()}>
+                    <Button onClick={() => this.onPreSignUpHandler()}>Sign up</Button>
                 </form>
             } else {
                 authForm = <div className={classes.AuthForm}>
@@ -144,6 +181,22 @@ class Auth extends Component {
                     <Button onClick={() => this.saveAsDocHandler()}>
                         Save as doc
                     </Button>
+                    <form className={classes.RegisterForm} onSubmit={() => this.onSignUpHandler()}>
+                        <Input
+                            errorMessage={this.state.controls.aesKey.errorMessage}
+                            key="aesKey"
+                            elementType={this.state.controls.aesKey.elementType}
+                            elementConfig={this.state.controls.aesKey.elementConfig}
+                            value={this.state.controls.aesKey.value}
+                            invalid={!this.state.controls.aesKey.valid}
+                            shouldValidate={this.state.controls.aesKey.validation}
+                            touched={this.state.controls.aesKey.touched}
+                            changed={( event ) => this.inputChangedHandler( event, "aesKey" )}
+                        />
+                        <Button>
+                            Register
+                        </Button>
+                    </form>
                 </div>
             }
         }
@@ -167,7 +220,7 @@ class Auth extends Component {
         }
 
         return <Aux>
-                <Modal show={ this.state.error ? this.state.error : null }
+                <Modal show={ this.state.error }
                        modalClosed={() => this.modalCloseHandler()}>
                     {
                         this.state.error
@@ -189,13 +242,15 @@ const mapStateToProps = state => {
     return {
         token: state.auth.authKey,
         isAuth: state.auth.authKey !== null,
+        error: state.auth.error,
         loading: state.auth.loading
     }
 };
 
 const mapDispatchToProps = dispatch => {
     return {
-        onAuth: (privateKey) => dispatch(actions.auth(privateKey)),
+        onAuth: (publicKey, aesKey) => dispatch(actions.auth(publicKey, aesKey)),
+        onCleanError: () => dispatch(actions.cleanError())
         // onLogout:() => dispatch(actions.logout())
     }
 };

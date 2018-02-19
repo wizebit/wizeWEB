@@ -18,7 +18,13 @@ export const authSuccess = (authData) => {
 export const authFail = (error) => {
     return {
         type: actionTypes.AUTH_FAIL,
-        error: error
+        error: error.message
+    }
+};
+
+export const cleanError = () => {
+    return {
+        type: actionTypes.AUTH_CLEAN_ERROR
     }
 };
 
@@ -31,22 +37,22 @@ export const logout = () => {
   }
 };
 
-export const auth = (privateKey) => {
+export const auth = (publicKey, aesKey) => {
   return dispatch => {
       dispatch(authStart());
-      axios.post(`${API_URL}/auth/sign-in`, {private_key: privateKey}, {headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}})
+      axios.post(`${API_URL}/auth/sign-in`, {publicKey: publicKey, aesKey: aesKey}, {headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}})
           .then(response => {
-              const expirationDate = new Date(new Date().getTime() + response.data.expires_in * 1000);
-              localStorage.setItem('wise-bit-auth-key', response.data.auth_key);
+              const expirationDate = new Date(new Date().getTime() + response.data.expiresIn * 1000);
+              localStorage.setItem('wise-bit-auth-key', response.data.accessToken);
               localStorage.setItem('wise-bit-auth-key-expiration-date', expirationDate);
 
-              dispatch(checkAuthTimeout(response.data.expires_in));
+              dispatch(checkAuthTimeout(response.data.expiresIn));
 
               dispatch(authSuccess(response.data));
           })
           .catch(error => {
-              console.log(error.response);
-              dispatch(authFail(error));
+              console.log(error.response.data);
+              dispatch(authFail(error.response.data));
           });
   };
 };
@@ -70,7 +76,7 @@ export const authCheckState = () => {
               dispatch(logout());
           } else {
               dispatch(checkAuthTimeout(expirationDate.getTime() - new Date().getTime()));
-              dispatch(authSuccess({auth_key: authKey}));
+              dispatch(authSuccess({accessToken: authKey}));
           }
       }
   }

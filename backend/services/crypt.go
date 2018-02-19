@@ -16,7 +16,7 @@ import (
 const (
 	presalt  = "R00qFyRJY0Pvfqjk3Oq9K4FXFwkfDNHyZ05ufj0dYcUb2hF79woYXhESMQSj5lN9kiAi9SW33LmAvo"
 	postsalt = "BfpZXF2n3TEG7pe4EFe1GFttYxzv4CJUOpFHx08NEVWV6RpSn6KofmLA1JBrTZWJfAWbLoiaSDBc55fMx4ICS4pUSr9125xkH12Y"
-	aesKey   = "bNCKcOvcKU5wLxPVhLcF5MtExncnpkhB"
+//	aesKey   = "bNCKcOvcKU5wLxPVhLcF5MtExncnpkhB"
 )
 
 func GetHash(data string) string {
@@ -27,13 +27,13 @@ func GetHash(data string) string {
 	return fmt.Sprintf("%x\n", h256.Sum(nil))
 }
 
-func GetAESEncode(data string) (string, error) {
+func GetAESEncode(data string, aesKey string) (string, error) {
 	key := []byte(aesKey)
 	encryptMsg, err := Encrypt(key, data)
 	return encryptMsg, err
 }
 
-func GetAESDecode(data string) (string, error) {
+func GetAESDecode(data string, aesKey string) (string, error) {
 	key := []byte(aesKey)
 	msg, err := Decrypt(key, data)
 	return msg, err

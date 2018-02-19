@@ -43,16 +43,13 @@ func (r *ReportController) GetReport() {
 
 	//	get user id
 	data := r.Ctx.Input.Data()
-	publicKey := data["publicKey"].(string)
-	beego.Warn(publicKey)
+	hashKey := data["hashKey"].(string)
 
-	//	get user
 	var u models.Users
-
 	o := orm.NewOrm()
 	o.Using("default")
-
-	err := o.QueryTable("users").Filter("public_key", publicKey).Limit(1).One(&u)
+	//find user
+	err := o.QueryTable("users").Filter("session_key", hashKey).Limit(1).One(&u)
 	if err != nil {
 		r.responseWithError(500, map[string]string{"message": err.Error()}, err)
 

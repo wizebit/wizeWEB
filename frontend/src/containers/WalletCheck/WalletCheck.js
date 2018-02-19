@@ -16,7 +16,7 @@ class WalletCheck extends Component {
 
     onInputNumberHandler = (e) => {
         const trigger = e.target.value;
-        this.setState({inputVal: trigger, loading: trigger, error: null});
+        this.setState({inputVal: trigger, walletInfo: null, loading: trigger, error: null});
         setTimeout(() => this.checkWalletHandler(trigger), 2000);
     };
 
@@ -24,7 +24,7 @@ class WalletCheck extends Component {
         if (val === this.state.inputVal && this.state.inputVal) {
             const config = {
                 headers: {
-                    'Authorization': this.props.token
+                    'X-ACCESS-TOKEN': this.props.token
                 }
             };
 

@@ -21,7 +21,7 @@ class WalletsList extends Component {
 
         const config = {
             headers: {
-                'Authorization': this.props.token
+                'X-ACCESS-TOKEN': this.props.token
             }
         };
 

@@ -5,11 +5,12 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/orm"
-	"github.com/coin-network/curve"
 	"github.com/dgrijalva/jwt-go"
 	"strings"
 	"wizeweb/backend/models"
 	"wizeweb/backend/services"
+	"wizeweb/backend/wallet"
+	"encoding/binary"
 )
 
 type AuthController struct {
@@ -18,15 +19,27 @@ type AuthController struct {
 
 var sessionName = beego.AppConfig.String("SessionName")
 
-//	login json form will have structure
-type User struct {
-	PrivateKey string `json:"private_key"`
+type UserSignUp struct {
+	PrivateKey string `json:"privateKey"`
+	PublicKey string `json:"publicKey"`
+	Address string `json:"address"`
+	AesKey string `json:"aesKey"`
 }
 
-//	auth form for admin panel
-type Admin struct {
-	PrivateKey string `form:"private_key"`
+type User struct {
+	PublicKey string `json:"publicKey"`
+	AesKey string `json:"aesKey"`
 }
+
+////	login json form will have structure
+//type User struct {
+//	PrivateKey string `json:"private_key"`
+//}
+//
+////	auth form for admin panel
+//type Admin struct {
+//	PrivateKey string `form:"private_key"`
+//}
 
 func (a *AuthController) responseWithError(status int, message map[string]string, err interface{}) {
 	beego.Error(err)
@@ -39,25 +52,225 @@ func (a *AuthController) responseWithError(status int, message map[string]string
 	return
 }
 
+
 //	API sign up (registration)
+//func (a *AuthController) UserSignUp() {
+//	KoblitzCurve := curve.S256() // see https://godoc.org/github.com/btcsuite/btcd/btcec#S256
+//
+//	privkey, err := curve.NewPrivateKey(KoblitzCurve)
+//
+//	if err != nil {
+//		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+//
+//		return
+//	}
+//
+//	pubkey := (privkey.PublicKey)
+//	address := privkey.PubKey().ToAddress()
+//
+//	u := new(models.Users)
+//	u.PrivateKey = services.GetHash(privkey.D.String())
+//	u.PublicKey = services.GetHash(pubkey.X.String())
+//	u.Wallet = services.GetHash(address)
+//	u.Role = 20
+//
+//	o := orm.NewOrm()
+//	o.Using("default")
+//
+//	_, err = o.Insert(u)
+//
+//	if err != nil {
+//		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+//
+//		return
+//	}
+//
+//	a.Data["json"] = map[string]string{
+//		"private_key": privkey.D.String(),
+//		"public_key":  pubkey.X.String(),
+//		"wallet":      address,
+//	}
+//	a.ServeJSON()
+//	a.StopRun()
+//}
+
+////	API sign in (login)
+//func (a *AuthController) UserSignIn() {
+//	//get body of request
+//	u := User{}
+//	json.Unmarshal(a.Ctx.Input.RequestBody, &u)
+//	//parse body
+//	if err := a.ParseForm(&u); err != nil {
+//		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+//
+//		return
+//	}
+//	//if pk is empty - return error
+//	if u.PrivateKey == "" {
+//		a.responseWithError(500, map[string]string{"message": "Empty private key!"}, "Auth: empty private key!")
+//
+//		return
+//	}
+//
+//	us := models.Users{}
+//
+//	o := orm.NewOrm()
+//	o.Using("default")
+//	//find user
+//	err := o.QueryTable("users").Filter("private_key", services.GetHash(u.PrivateKey)).Limit(1).One(&us)
+//
+//	if err != nil {
+//		a.responseWithError(400, map[string]string{"message": err.Error()}, err)
+//
+//		return
+//	}
+//
+//	token, expiresIn, err := services.CreateSignedTokenString(us.PublicKey)
+//	a.Data["json"] = map[string]interface{}{
+//		"auth_key":   token,
+//		"expires_in": expiresIn,
+//	}
+//	a.ServeJSON()
+//	a.StopRun()
+//}
+
+//	admin sign in
+//func (a *AuthController) AdminAuth() {
+//	a.TplName = "auth/index.tpl"
+//}
+//func (a *AuthController) AdminSignIn() {
+//	adm := Admin{}
+//	if err := a.ParseForm(&adm); err != nil {
+//		beego.Error(err)
+//		a.Data["errorMessage"] = err.Error()
+//	}
+//
+//	if adm.PrivateKey == "" {
+//		beego.Error("Your private key is empty")
+//		a.Data["errorMessage"] = "Your private key is empty"
+//		a.TplName = "auth/index.tpl"
+//		return
+//	}
+//
+//	var u models.Users
+//
+//	o := orm.NewOrm()
+//	o.Using("default")
+//	//find user
+//	err := o.QueryTable("users").Filter("private_key", services.GetHash(adm.PrivateKey)).Limit(1).One(&u)
+//
+//	if err != nil {
+//		beego.Error(err)
+//		a.Data["errorMessage"] = err.Error()
+//		a.TplName = "auth/index.tpl"
+//		return
+//	}
+//
+//	if u.Role == 0 {
+//		v := a.GetSession(sessionName)
+//		if v == nil {
+//			a.SetSession(sessionName, u.PublicKey)
+//		}
+//		a.Redirect("/admin", 302)
+//	}
+//
+//	a.Data["errorMessage"] = "Unauthorised access to this resource"
+//	a.TplName = "auth/index.tpl"
+//}
+//func (a *AuthController) AdminSignOut() {
+//	a.DelSession(sessionName)
+//	a.Redirect("/", 302)
+//}
+//
+//// customize filters for fine grain authorization
+//var FilterUser = func(ctx *context.Context) {
+//	//Unauthorised requests
+//	if strings.HasPrefix(ctx.Input.URL(), "/auth") || strings.HasPrefix(ctx.Input.URL(), "/storage") {
+//		return
+//	}
+//
+//	//Auth requests
+//	if strings.HasPrefix(ctx.Input.URL(), "/api") && ctx.Input.Header("Authorization") != "" {
+//		parsedToken, err := services.ParseTokenFromSignedTokenString(ctx.Input.Header("Authorization"))
+//
+//		if err == nil && parsedToken.Valid {
+//			exp := parsedToken.Claims.(jwt.MapClaims)["exp"]
+//			publicKey := parsedToken.Claims.(jwt.MapClaims)["publicKey"]
+//
+//			ctx.Input.SetData("exp", exp)
+//			ctx.Input.SetData("publicKey", publicKey)
+//
+//			return
+//		}
+//	}
+//
+//	if strings.HasPrefix(ctx.Input.URL(), "/admin") {
+//		_, ok := ctx.Input.Session(sessionName).(string)
+//
+//		if ok {
+//			var u models.Users
+//			o := orm.NewOrm()
+//			o.Using("default")
+//			//find user
+//			err := o.QueryTable("users").Filter("public_key", ctx.Input.Session(sessionName).(string)).Limit(1).One(&u)
+//
+//			if err == nil && u.Role == 0 {
+//				return
+//			} else {
+//				ctx.Redirect(302, "/auth/admin")
+//			}
+//		} else {
+//			ctx.Redirect(302, "/auth/admin")
+//		}
+//	}
+//
+//	ctx.Output.SetStatus(403)
+//	ctx.Output.Body([]byte(`{"message": "Unauthorised access to this resource"}`))
+//}
+
+
+
+func (a *AuthController) UserPreSignUp(){
+	var w *wallet.Wallet
+
+	w = wallet.NewWallet()
+
+	beego.Warn(w.PublicKey)
+	beego.Info(w.PrivateKey)
+
+	a.Data["json"] = map[string]interface{}{
+		"privateKey": w.PrivateKey.D.String(),
+		"publicKey": w.PublicKey,
+		"address": w.GetAddress(),
+	}
+	a.ServeJSON()
+	a.StopRun()
+}
+
 func (a *AuthController) UserSignUp() {
-	KoblitzCurve := curve.S256() // see https://godoc.org/github.com/btcsuite/btcd/btcec#S256
+	//	get body of request
+	uf := UserSignUp{}
+	json.Unmarshal(a.Ctx.Input.RequestBody, &uf)
 
-	privkey, err := curve.NewPrivateKey(KoblitzCurve)
+	if binary.Size([]byte(uf.AesKey)) != 32 {
+		a.responseWithError(400, map[string]string{"message": "password is not equal to 32 bytes"}, "password is not equal to 32 bytes. AesKey length:" + string(binary.Size([]byte(uf.AesKey))))
 
+		return
+	}
+
+	//	Encode private key
+	csk, err := services.GetAESEncode(uf.PrivateKey, uf.AesKey)
 	if err != nil {
 		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
 		return
 	}
 
-	pubkey := (privkey.PublicKey)
-	address := privkey.PubKey().ToAddress()
-
+	//	create user in DB
 	u := new(models.Users)
-	u.PrivateKey = services.GetHash(privkey.D.String())
-	u.PublicKey = services.GetHash(pubkey.X.String())
-	u.Wallet = services.GetHash(address)
+	u.PrivateKey = csk
+	u.PublicKey = uf.PublicKey
+	u.Address = uf.Address
 	u.Role = 20
 
 	o := orm.NewOrm()
@@ -71,57 +284,37 @@ func (a *AuthController) UserSignUp() {
 		return
 	}
 
-	a.Data["json"] = map[string]string{
-		"private_key": privkey.D.String(),
-		"public_key":  pubkey.X.String(),
-		"wallet":      address,
+	//	return result
+	a.Data["json"] = map[string]interface{}{
+		"message": "success",
 	}
 	a.ServeJSON()
 	a.StopRun()
-
-	//TODO: NEW PRIVATE KEY/ADDRESS/PUB KEY GENERATION
-
-	//var w *wallet.Wallet
-	//
-	//w = wallet.NewWallet()
-	//
-	//beego.Warn(w.PublicKey)
-	//beego.Info(w.PrivateKey)
-	//beego.Warn(w.GetAddress())
-	//
-	//a.Data["json"] = map[string]interface{}{
-	//	"private_key": "hello world",
-	//	"public_key": "hello world",
-	//	"wallet": "hello world",
-	//}
-	//a.ServeJSON()
-	//a.StopRun()
 }
 
-//	API sign in (login)
 func (a *AuthController) UserSignIn() {
-	//get body of request
-	u := User{}
-	json.Unmarshal(a.Ctx.Input.RequestBody, &u)
-	//parse body
-	if err := a.ParseForm(&u); err != nil {
-		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+	//	get body of request
+	uf := User{}
+	json.Unmarshal(a.Ctx.Input.RequestBody, &uf)
 
-		return
-	}
-	//if pk is empty - return error
-	if u.PrivateKey == "" {
+	//	if pk is empty - return error
+	if uf.PublicKey == "" {
 		a.responseWithError(500, map[string]string{"message": "Empty private key!"}, "Auth: empty private key!")
 
 		return
+	} else if uf.AesKey == "" {
+		a.responseWithError(500, map[string]string{"message": "Empty password!"}, "Auth: empty password!")
+
+		return
 	}
 
-	us := models.Users{}
+	u := models.Users{}
 
 	o := orm.NewOrm()
 	o.Using("default")
-	//find user
-	err := o.QueryTable("users").Filter("private_key", services.GetHash(u.PrivateKey)).Limit(1).One(&us)
+
+	//	find user
+	err := o.QueryTable("users").Filter("public_key", uf.PublicKey).Limit(1).One(&u)
 
 	if err != nil {
 		a.responseWithError(400, map[string]string{"message": err.Error()}, err)
@@ -129,64 +322,34 @@ func (a *AuthController) UserSignIn() {
 		return
 	}
 
-	token, expiresIn, err := services.CreateSignedTokenString(us.PublicKey)
+	//	decode Private Key
+	csk, err := services.GetAESDecode(u.PrivateKey, uf.AesKey)
+
+	if err != nil {
+		a.responseWithError(400, map[string]string{"message": err.Error()}, err)
+
+		return
+	}
+
+	hashKey := services.GetHash(csk)
+	u.SessionKey = hashKey
+	_, err = o.Update(&u)
+	if err != nil {
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+
+		return
+	}
+
+	token, expiresIn, err := services.CreateSignedTokenString(hashKey)
 	a.Data["json"] = map[string]interface{}{
-		"auth_key":   token,
-		"expires_in": expiresIn,
+		"accessToken":   token,
+		"expiresIn": expiresIn,
 	}
 	a.ServeJSON()
 	a.StopRun()
 }
 
-//	admin sign in
-func (a *AuthController) AdminAuth() {
-	a.TplName = "auth/index.tpl"
-}
-func (a *AuthController) AdminSignIn() {
-	adm := Admin{}
-	if err := a.ParseForm(&adm); err != nil {
-		beego.Error(err)
-		a.Data["errorMessage"] = err.Error()
-	}
-
-	if adm.PrivateKey == "" {
-		beego.Error("Your private key is empty")
-		a.Data["errorMessage"] = "Your private key is empty"
-		a.TplName = "auth/index.tpl"
-		return
-	}
-
-	var u models.Users
-
-	o := orm.NewOrm()
-	o.Using("default")
-	//find user
-	err := o.QueryTable("users").Filter("private_key", services.GetHash(adm.PrivateKey)).Limit(1).One(&u)
-
-	if err != nil {
-		beego.Error(err)
-		a.Data["errorMessage"] = err.Error()
-		a.TplName = "auth/index.tpl"
-		return
-	}
-
-	if u.Role == 0 {
-		v := a.GetSession(sessionName)
-		if v == nil {
-			a.SetSession(sessionName, u.PublicKey)
-		}
-		a.Redirect("/admin", 302)
-	}
-
-	a.Data["errorMessage"] = "Unauthorised access to this resource"
-	a.TplName = "auth/index.tpl"
-}
-func (a *AuthController) AdminSignOut() {
-	a.DelSession(sessionName)
-	a.Redirect("/", 302)
-}
-
-// customize filters for fine grain authorization
+//	customize filters for fine grain authorization
 var FilterUser = func(ctx *context.Context) {
 	//Unauthorised requests
 	if strings.HasPrefix(ctx.Input.URL(), "/auth") || strings.HasPrefix(ctx.Input.URL(), "/storage") {
@@ -194,15 +357,15 @@ var FilterUser = func(ctx *context.Context) {
 	}
 
 	//Auth requests
-	if strings.HasPrefix(ctx.Input.URL(), "/api") && ctx.Input.Header("Authorization") != "" {
-		parsedToken, err := services.ParseTokenFromSignedTokenString(ctx.Input.Header("Authorization"))
+	if strings.HasPrefix(ctx.Input.URL(), "/api") && ctx.Input.Header("X-ACCESS-TOKEN") != "" {
+		parsedToken, err := services.ParseTokenFromSignedTokenString(ctx.Input.Header("X-ACCESS-TOKEN"))
 
 		if err == nil && parsedToken.Valid {
-			exp := parsedToken.Claims.(jwt.MapClaims)["exp"]
-			publicKey := parsedToken.Claims.(jwt.MapClaims)["publicKey"]
+			expiresIn := parsedToken.Claims.(jwt.MapClaims)["expiresIn"]
+			hashKey := parsedToken.Claims.(jwt.MapClaims)["hashKey"]
 
-			ctx.Input.SetData("exp", exp)
-			ctx.Input.SetData("publicKey", publicKey)
+			ctx.Input.SetData("expiresIn", expiresIn)
+			ctx.Input.SetData("hashKey", hashKey)
 
 			return
 		}
@@ -216,7 +379,7 @@ var FilterUser = func(ctx *context.Context) {
 			o := orm.NewOrm()
 			o.Using("default")
 			//find user
-			err := o.QueryTable("users").Filter("public_key", ctx.Input.Session(sessionName).(string)).Limit(1).One(&u)
+			err := o.QueryTable("users").Filter("session_key", ctx.Input.Session(sessionName).(string)).Limit(1).One(&u)
 
 			if err == nil && u.Role == 0 {
 				return

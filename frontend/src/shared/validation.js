@@ -21,6 +21,11 @@ const checkValidity = (value, rules, fieldName = null) => {
             validationObj.errorMessage = fieldName ? `${name} value is longer than required` : 'This field value is longer than required';
         }
 
+        if (rules.length) {
+            validationObj.isValid = value.length === rules.length;
+            validationObj.errorMessage = fieldName ? `The ${name} length is not equal to ${rules.length} characters` : `The field length is not equal to ${rules.length} characters`;
+        }
+
         if (rules.isEmail) {
             const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
             validationObj.isValid = pattern.test(value) && validationObj.isValid;

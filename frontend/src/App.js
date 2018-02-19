@@ -7,6 +7,7 @@ import { authCheckState } from './store/actions/index';
 import Auth from './containers/Auth/Auth';
 import Layout from "./hoc/Layout/Layout";
 
+const asyncLogout = asyncComponent(() => import('./containers/Auth/Logout/Logout'));
 const asyncFilesList = asyncComponent(() => import('./containers/FilesList/FilesList'));
 const asyncFileUpload = asyncComponent(() => import('./containers/FileUpload/FileUpload'));
 const asyncWalletsList = asyncComponent(() => import('./containers/WalletsList/WalletsList'));
@@ -27,6 +28,7 @@ class App extends Component {
           routes = <Layout>
               <Switch>
                   <Route exact path="/" component={asyncFilesList} />
+                  <Route exact path="/logout" component={asyncLogout} />
                   <Route exact path="/upload-files" component={asyncFileUpload} />
                   <Route exact path="/wallets-list" component={asyncWalletsList} />
                   <Route exact path="/wallet-check" component={asyncWalletCheck} />

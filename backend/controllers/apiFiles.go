@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 	"wizeweb/backend/services"
+	"wizeweb/backend/models"
 )
 
 type ApiController struct {
@@ -34,12 +35,23 @@ func (a *ApiController) responseWithError(status int, message map[string]string,
 
 func (a *ApiController) GetFilesList() {
 	data := a.Ctx.Input.Data()
-	publicKey := services.Trim(data["publicKey"].(string))
+	hashKey := data["hashKey"].(string)
+
+	var u models.Users
+	o := orm.NewOrm()
+	o.Using("default")
+	//find user
+	err := o.QueryTable("users").Filter("session_key", hashKey).Limit(1).One(&u)
+	if err != nil {
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+
+		return
+	}
 
 	//	find our user folder
-	if _, err := os.Stat("./storage/" + publicKey); os.IsNotExist(err) {
+	if _, err := os.Stat("./storage/" + u.PublicKey); os.IsNotExist(err) {
 		//	if there is no folder for user - create it
-		err := os.MkdirAll("./storage/"+publicKey, os.ModePerm)
+		err := os.MkdirAll("./storage/"+u.PublicKey, os.ModePerm)
 		if err != nil {
 			a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
@@ -48,7 +60,7 @@ func (a *ApiController) GetFilesList() {
 	}
 
 	//	read our storage
-	files, err := ioutil.ReadDir("./storage/" + publicKey)
+	files, err := ioutil.ReadDir("./storage/" + u.PublicKey)
 	if err != nil {
 		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
@@ -61,7 +73,7 @@ func (a *ApiController) GetFilesList() {
 		delimiter := strings.Index(file.Name(), "~")
 		name := file.Name()[delimiter+1:]
 		date := file.Name()[:delimiter]
-		rel := "/storage/" + publicKey + "/" + file.Name()
+		rel := "/storage/" + u.PublicKey + "/" + file.Name()
 		if err != nil {
 			a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
@@ -92,13 +104,24 @@ func (a *ApiController) UploadFile() {
 
 	//	get our user id
 	data := a.Ctx.Input.Data()
-	publicKey := services.Trim(data["publicKey"].(string))
+	hashKey := data["hashKey"].(string)
 	//idStr := strconv.Itoa(int(id.(float64)))
 
+	var u models.Users
+	o := orm.NewOrm()
+	o.Using("default")
+	//find user
+	err = o.QueryTable("users").Filter("session_key", hashKey).Limit(1).One(&u)
+	if err != nil {
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+
+		return
+	}
+
 	//	find our user folder
-	if _, err := os.Stat("./storage/" + publicKey); os.IsNotExist(err) {
+	if _, err := os.Stat("./storage/" + u.PublicKey); os.IsNotExist(err) {
 		//	if there is no folder for user - create it
-		err := os.MkdirAll("./storage/"+publicKey, os.ModePerm)
+		err := os.MkdirAll("./storage/"+u.PublicKey, os.ModePerm)
 		if err != nil {
 			a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
@@ -115,7 +138,7 @@ func (a *ApiController) UploadFile() {
 		//	TODO: Data sharding
 
 		//	save to server
-		err := a.SaveToFile("file", "./storage/"+publicKey+"/"+timeNow+"~"+fileName)
+		err := a.SaveToFile("file", "./storage/"+u.PublicKey+"/"+timeNow+"~"+fileName)
 		if err != nil {
 			beego.Error(err)
 		}
@@ -128,7 +151,18 @@ func (a *ApiController) UploadFile() {
 
 func (a *ApiController) DeleteFile() {
 	data := a.Ctx.Input.Data()
-	publicKey := services.Trim(data["publicKey"].(string))
+	hashKey := data["hashKey"].(string)
+
+	var u models.Users
+	o := orm.NewOrm()
+	o.Using("default")
+	//find user
+	err := o.QueryTable("users").Filter("session_key", hashKey).Limit(1).One(&u)
+	if err != nil {
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+
+		return
+	}
 
 	//get body of request
 	req := FileRequest{}
@@ -141,13 +175,13 @@ func (a *ApiController) DeleteFile() {
 		return
 	}
 
-	if _, err := os.Stat("./storage/" + publicKey + "/" + req.Filename); os.IsNotExist(err) {
+	if _, err := os.Stat("./storage/" + u.PublicKey + "/" + req.Filename); os.IsNotExist(err) {
 		a.responseWithError(400, map[string]string{"message": err.Error()}, err)
 
 		return
 	}
 
-	err := os.Remove("./storage/" + publicKey + "/" + req.Filename)
+	err = os.Remove("./storage/" + u.PublicKey + "/" + req.Filename)
 
 	if err != nil {
 		a.responseWithError(400, map[string]string{"message": err.Error()}, err)
@@ -162,7 +196,18 @@ func (a *ApiController) DeleteFile() {
 
 func (a *ApiController) TransferFile() {
 	data := a.Ctx.Input.Data()
-	publicKey := services.Trim(data["publicKey"].(string))
+	hashKey := data["hashKey"].(string)
+
+	var u models.Users
+	o := orm.NewOrm()
+	o.Using("default")
+	//find user
+	err := o.QueryTable("users").Filter("session_key", hashKey).Limit(1).One(&u)
+	if err != nil {
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+
+		return
+	}
 
 	//	get body of request
 	req := FileRequest{}
@@ -178,15 +223,13 @@ func (a *ApiController) TransferFile() {
 	beego.Warn(req)
 
 	//	copy file with check if file/folders exist
-	if _, err := os.Stat("./storage/" + publicKey + "/" + req.Filename); os.IsNotExist(err) {
+	if _, err := os.Stat("./storage/" + u.PublicKey + "/" + req.Filename); os.IsNotExist(err) {
 		a.responseWithError(400, map[string]string{"message": err.Error()}, err)
 
 		return
 	}
 
 	//	check if user who will get transfer is exist
-	o := orm.NewOrm()
-	o.Using("default")
 	exist := o.QueryTable("users").Filter("publicKey", services.GetHash(req.TransferTo)).Exist()
 	if !exist {
 		a.responseWithError(400, map[string]string{"message": "there is no such user"},
@@ -209,7 +252,7 @@ func (a *ApiController) TransferFile() {
 	//	start copy stream
 	//
 	//	from
-	from, err := os.Open("./storage/" + publicKey + "/" + req.Filename)
+	from, err := os.Open("./storage/" + u.PublicKey + "/" + req.Filename)
 	if err != nil {
 		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
@@ -233,7 +276,7 @@ func (a *ApiController) TransferFile() {
 	}
 
 	//	remove old file
-	err = os.Remove("./storage/" + publicKey + "/" + req.Filename)
+	err = os.Remove("./storage/" + u.PublicKey + "/" + req.Filename)
 
 	if err != nil {
 		a.responseWithError(500, map[string]string{"message": err.Error()}, err)

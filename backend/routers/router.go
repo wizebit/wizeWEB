@@ -10,10 +10,11 @@ func init() {
 	//	Unauthorised requests
 	//
 	//	API
+	beego.Router("/auth/pre-sign-up", &controllers.AuthController{}, "post:UserPreSignUp")
 	beego.Router("/auth/sign-up", &controllers.AuthController{}, "post:UserSignUp")
 	beego.Router("/auth/sign-in", &controllers.AuthController{}, "post:UserSignIn")
-	beego.Router("/auth/admin", &controllers.AuthController{}, "get:AdminAuth")
-	beego.Router("/auth/admin/sign-in", &controllers.AuthController{}, "post:AdminSignIn")
+	//beego.Router("/auth/admin", &controllers.AuthController{}, "get:AdminAuth")
+	//beego.Router("/auth/admin/sign-in", &controllers.AuthController{}, "post:AdminSignIn")
 	//
 	//	Admin panel
 
@@ -38,7 +39,7 @@ func init() {
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins: true,
 		AllowMethods:    []string{"GET", "HEAD", "POST", "PUT", "OPTIONS"},
-		AllowHeaders:    []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Content-Type"},
+		AllowHeaders:    []string{"Origin", "X-ACCESS-TOKEN", "Access-Control-Allow-Origin", "Content-Type"},
 		ExposeHeaders:   []string{"Content-Length", "Access-Control-Allow-Origin"},
 	}))
 	beego.InsertFilter("/*", beego.BeforeRouter, controllers.FilterUser)

@@ -26,7 +26,7 @@ class Files extends Component {
                 setTimeout(() => this.setState({progress: percentCompleted}), 400);
             },
             headers: {
-                'Authorization': this.props.token,
+                'X-ACCESS-TOKEN': this.props.token,
                 'Content-Type': 'multipart/form-data'
             }
         };

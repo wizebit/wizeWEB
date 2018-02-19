@@ -7,17 +7,20 @@
     width: 100%;
     min-width: 320px;
     padding: 0 32px 0 40px;
+    box-sizing: border-box;
 }
 .HeaderContent {
     display: flex;
     width: 100%;
     height: 100%;
     align-items: center;
+    justify-content: space-between;
 }
-.Logo {
+.Logo a, .Logout a {
     font-size: 24px;
     color: white;
     font-family: "Droid Sans", sans-serif;
     cursor: pointer;
     font-weight: 700;
+    text-decoration: none;
 }
