@@ -27,6 +27,9 @@
             border-color: $blue
             color: $blue
 
+            &:not(:last-of-type)
+              margin-bottom: 18px
+
             &::placeholder
               color: $blue
           &[type="submit"]
@@ -43,5 +46,8 @@
         color: $red
         width: 100%
         text-align: right
-        margin-top: 7.5px
-        margin-bottom: -7.5px
+        //margin-top: 7.5px
+        //margin-bottom: -7.5px
+
+        &.to-top
+          margin-top: -18px

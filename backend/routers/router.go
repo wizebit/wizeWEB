@@ -10,15 +10,15 @@ func init() {
 	//	Unauthorised requests
 	//
 	//	API
-	beego.Router("/auth/pre-sign-up", &controllers.AuthController{}, "post:UserPreSignUp")
-	beego.Router("/auth/sign-up", &controllers.AuthController{}, "post:UserSignUp")
+	beego.Router("/auth/sign-up", &controllers.AuthController{}, "post:SignUp")
 	beego.Router("/auth/sign-in", &controllers.AuthController{}, "post:UserSignIn")
-	//beego.Router("/auth/admin", &controllers.AuthController{}, "get:AdminAuth")
-	//beego.Router("/auth/admin/sign-in", &controllers.AuthController{}, "post:AdminSignIn")
 	//
 	//	Admin panel
+	beego.Router("/auth/admin", &controllers.AuthController{}, "get:AdminAuth")
+	beego.Router("/auth/admin/sign-in", &controllers.AuthController{}, "post:AdminSignIn")
+	beego.Router("/auth/admin/sign-out", &controllers.AuthController{}, "get:AdminSignOut")
 
-	//	Auth requests
+	//	Authorised requests
 	//
 	//	API
 	//	Files
@@ -31,6 +31,8 @@ func init() {
 	//	Wallets
 	beego.Router("/api/get-wallets-list", &controllers.WalletController{}, "get:WalletsList")
 	beego.Router("/api/wallet/:walletNumber", &controllers.WalletController{}, "get:WalletCheck")
+	//	Transactions
+	beego.Router("/api/transaction/create", &controllers.TransactionController{}, "post:CreateTransaction")
 
 	//	Admin panel
 	beego.Router("/admin", &controllers.AdminController{}, "get:Index")

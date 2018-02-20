@@ -1,20 +1,20 @@
-.Dropzone {
-    width: 100%;
-    height: 50vh;
-    padding: 30px;
-    border-width: 2px;
-    border-color: rgb(102, 102, 102);
-    border-style: dashed;
-    border-radius: 5px;
-    box-sizing: border-box;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.DropzoneWrapper>div {
+    width: 100% !important;
+    height: 50vh !important;
+    padding: 30px !important;
+    border-width: 2px !important;
+    border-color: rgb(102, 102, 102) !important;
+    border-style: dashed !important;
+    border-radius: 5px !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
-.Dropzone p {
-    margin: 0;
+.DropzoneWrapper>div p {
+    margin: 0 !important;
 }
 
 .ProgressBar {

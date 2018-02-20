@@ -8,10 +8,17 @@
                 <h2>Welcome, admin.</h2>
                 <h2>Please, sign in.</h2>
                 <div class="form-group">
-                    <input name="private_key" type="text" class="form-control" placeholder="Enter your private key">
+                    <input name="public_key" type="text" class="form-control" placeholder="Enter public key">
                     {{if .errorMessage}}
-                        <div class="invalid-feedback">
+                        <div class="invalid-feedback to-top">
                             {{.errorMessage}}
+                        </div>
+                    {{end}}
+                    <input name="aes_key" type="text" class="form-control" placeholder="Enter password"
+                           maxlength="32" size="32">
+                    {{if .errorMessage2}}
+                        <div class="invalid-feedback">
+                            {{.errorMessage2}}
                         </div>
                     {{end}}
                 </div>

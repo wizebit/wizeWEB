@@ -63,25 +63,27 @@ class Files extends Component {
 
         return <div>
             <h1>Files page</h1>
-            <Dropzone
-                onDrop={files => this.onDropHandler(files[0])}
-                // className={classes.Dropzone}
-                //
-                //  or
-                //
-                // style={{
-                //     width: "100%",
-                //     height: "50vh",
-                //     padding: "30px",
-                //     boxSizing: "border-box",
-                //     cursor: "pointer",
-                //     display: "flex",
-                //     justifyContent: "center",
-                //     alignItems: "center"
-                // }}
-            >
-                <p>Try dropping some files here, or click to select files to upload.</p>
-            </Dropzone>
+            <div className={classes.DropzoneWrapper}>
+                <Dropzone
+                    onDrop={files => this.onDropHandler(files[0])}
+                    // className={classes.Dropzone}
+                    //
+                    //  or
+                    //
+                    // style={{
+                    //     width: "100%",
+                    //     height: "50vh",
+                    //     padding: "30px",
+                    //     boxSizing: "border-box",
+                    //     cursor: "pointer",
+                    //     display: "flex",
+                    //     justifyContent: "center",
+                    //     alignItems: "center"
+                    // }}
+                >
+                    <p>Try dropping some files here, or click to select files to upload.</p>
+                </Dropzone>
+            </div>
 
             {progress}
         </div>

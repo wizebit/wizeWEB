@@ -25,6 +25,11 @@ const sidebarList = () => {
             icon: "fa-check",
             label: "Wallet Check"
         },
+        {
+            link: "/transaction-create",
+            icon: "fa-money",
+            label: "New Transaction"
+        }
     ];
 
     return <aside className={classes.SidebarList}>

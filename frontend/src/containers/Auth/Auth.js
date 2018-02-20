@@ -77,49 +77,27 @@ class Auth extends Component {
         }
     };
 
-    onPreSignUpHandler = () => {
-        const conf = {headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        }};
+    onSignUpHandler = () => {
+        const conf = {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        };
 
-        this.setState({regData: null, loading: true, error: null});
+        const data = {
+            aesKey: this.state.controls.aesKey.value
+        };
 
-        axios.post(`${API_URL}/auth/pre-sign-up`, {}, conf)
+        axios.post(`${API_URL}/auth/sign-up`, data, conf)
             .then(response => {
                 this.setState({regData: response.data, loading: false, error: null});
-                console.log(response)
+                // console.log(response)
             })
             .catch(error => {
-                this.setState({regData: false, loading: false, error: error.response.data.message});
-                console.log(error.response.data.message)
+                this.setState({regData: null, loading: false, error: error.response.data.message});
+                // console.log(error.response.data.message)
             })
-    };
-
-    onSignUpHandler = () => {
-        if (this.state.controls.aesKey.valid) {
-            const conf = {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                }
-            };
-
-            const data = {
-                ...this.state.regData,
-                aesKey: this.state.controls.aesKey.value
-            };
-
-            axios.post(`${API_URL}/auth/sign-up`, data, conf)
-                .then(response => {
-                    this.setState({regData: response.data, loading: false, error: null});
-                    console.log(response)
-                })
-                .catch(error => {
-                    this.setState({regData: false, loading: false, error: error.response.data.message});
-                    console.log(error.response.data.message)
-                })
-        }
     };
 
     saveAsDocHandler = () => {
@@ -166,7 +144,18 @@ class Auth extends Component {
         if (this.state.register) {
             if (!this.state.regData) {
                 authForm = <form className={classes.AuthForm} onSubmit={() => this.onSignUpHandler()}>
-                    <Button onClick={() => this.onPreSignUpHandler()}>Sign up</Button>
+                    <Input
+                        errorMessage={this.state.controls.aesKey.errorMessage}
+                        key="aesKey"
+                        elementType={this.state.controls.aesKey.elementType}
+                        elementConfig={this.state.controls.aesKey.elementConfig}
+                        value={this.state.controls.aesKey.value}
+                        invalid={!this.state.controls.aesKey.valid}
+                        shouldValidate={this.state.controls.aesKey.validation}
+                        touched={this.state.controls.aesKey.touched}
+                        changed={( event ) => this.inputChangedHandler( event, "aesKey" )}
+                    />
+                    <Button>Sign up</Button>
                 </form>
             } else {
                 authForm = <div className={classes.AuthForm}>
@@ -181,22 +170,6 @@ class Auth extends Component {
                     <Button onClick={() => this.saveAsDocHandler()}>
                         Save as doc
                     </Button>
-                    <form className={classes.RegisterForm} onSubmit={() => this.onSignUpHandler()}>
-                        <Input
-                            errorMessage={this.state.controls.aesKey.errorMessage}
-                            key="aesKey"
-                            elementType={this.state.controls.aesKey.elementType}
-                            elementConfig={this.state.controls.aesKey.elementConfig}
-                            value={this.state.controls.aesKey.value}
-                            invalid={!this.state.controls.aesKey.valid}
-                            shouldValidate={this.state.controls.aesKey.validation}
-                            touched={this.state.controls.aesKey.touched}
-                            changed={( event ) => this.inputChangedHandler( event, "aesKey" )}
-                        />
-                        <Button>
-                            Register
-                        </Button>
-                    </form>
                 </div>
             }
         }
@@ -220,13 +193,13 @@ class Auth extends Component {
         }
 
         return <Aux>
-                <Modal show={ this.state.error }
-                       modalClosed={() => this.modalCloseHandler()}>
+                <Modal show={ this.props.error || this.state.error }
+                       modalClosed={() => {this.props.onCleanError(); this.state.modalCloseHandler();}}>
                     {
-                        this.state.error
+                        this.props.error || this.state.error
                             ? <div className={classes.ModalContent}>
-                                <h1>{this.state.error}</h1>
-                                <Button onClick={() => this.modalCloseHandler()}>Ok</Button>
+                                <h1>{this.props.error ? this.props.error : this.state.error}</h1>
+                                <Button onClick={() => {this.props.onCleanError(); this.state.modalCloseHandler();}}>Ok</Button>
                             </div>
                             : null
                     }

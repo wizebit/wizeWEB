@@ -12,6 +12,7 @@ const asyncFilesList = asyncComponent(() => import('./containers/FilesList/Files
 const asyncFileUpload = asyncComponent(() => import('./containers/FileUpload/FileUpload'));
 const asyncWalletsList = asyncComponent(() => import('./containers/WalletsList/WalletsList'));
 const asyncWalletCheck = asyncComponent(() => import('./containers/WalletCheck/WalletCheck'));
+const asyncCreateTransaction = asyncComponent(() => import('./containers/CreateTransaction/CreateTransaction'));
 
 class App extends Component {
     componentDidMount() {
@@ -32,6 +33,7 @@ class App extends Component {
                   <Route exact path="/upload-files" component={asyncFileUpload} />
                   <Route exact path="/wallets-list" component={asyncWalletsList} />
                   <Route exact path="/wallet-check" component={asyncWalletCheck} />
+                  <Route exact path="/transaction-create" component={asyncCreateTransaction} />
                   <Redirect to="/" />
               </Switch>
           </Layout>
