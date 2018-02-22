@@ -51,7 +51,6 @@ export const auth = (publicKey, aesKey) => {
               dispatch(authSuccess(response.data));
           })
           .catch(error => {
-              console.log(error.response.data);
               dispatch(authFail(error.response.data));
           });
   };
@@ -66,7 +65,6 @@ export const checkAuthTimeout = (expirationTime) => {
 export const authCheckState = () => {
   return dispatch => {
       const authKey = localStorage.getItem('wise-bit-auth-key');
-
 
       if (!authKey) {
           dispatch(logout());

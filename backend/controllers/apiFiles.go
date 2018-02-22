@@ -135,7 +135,7 @@ func (a *ApiController) UploadFile() {
 		//	timestamp
 		timeNow := strconv.Itoa(int(time.Now().Unix()))
 
-		//	TODO: Data sharding
+		//	TODO: Data sharding, sharing
 
 		//	save to server
 		err := a.SaveToFile("file", "./storage/"+u.PublicKey+"/"+timeNow+"~"+fileName)
