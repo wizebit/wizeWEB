@@ -10,7 +10,7 @@ import (
 	"wizeweb/backend/models"
 	"wizeweb/backend/services"
 	"encoding/binary"
-	"github.com/astaxie/beego/httplib"
+
 )
 
 type AuthController struct {
@@ -50,64 +50,6 @@ func (a *AuthController) responseWithError(status int, message map[string]string
 	return
 }
 
-//func (a *AuthController) UserPreSignUp(){
-//	var w *wallet.Wallet
-//
-//	w = wallet.NewWallet()
-//
-//	a.Data["json"] = map[string]interface{}{
-//		"privateKey": w.PrivateKey.D.String(),
-//		"publicKey": w.PublicKey,
-//		"address": w.GetAddress(),
-//	}
-//	a.ServeJSON()
-//	a.StopRun()
-//}
-//
-//func (a *AuthController) UserSignUp() {
-//	//	get body of request
-//	uf := UserSignUp{}
-//	json.Unmarshal(a.Ctx.Input.RequestBody, &uf)
-//
-//	if binary.Size([]byte(uf.AesKey)) != 32 {
-//		a.responseWithError(400, map[string]string{"message": "password is not equal to 32 bytes"}, "password is not equal to 32 bytes. AesKey length:" + string(binary.Size([]byte(uf.AesKey))))
-//
-//		return
-//	}
-//
-//	//	Encode private key
-//	csk, err := services.GetAESEncode(uf.PrivateKey, uf.AesKey)
-//	if err != nil {
-//		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
-//
-//		return
-//	}
-//
-//	//	create user in DB
-//	u := new(models.Users)
-//	u.PrivateKey = csk
-//	u.PublicKey = uf.PublicKey
-//	u.Address = uf.Address
-//	u.Role = 20
-//
-//	o := orm.NewOrm()
-//	o.Using("default")
-//
-//	_, err = o.Insert(u)
-//
-//	if err != nil {
-//		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
-//
-//		return
-//	}
-//
-//	//	return result
-//	a.Data["json"] = map[string]interface{}{
-//		"message": "success",
-//	}
-//	a.ServeJSON()
-//	a.StopRun()
-//}
 
 func (a *AuthController) SignUp() {
 		//	get body of request (for aes key)
@@ -118,33 +60,41 @@ func (a *AuthController) SignUp() {
 			a.responseWithError(400, map[string]string{"message": "password is empty"}, "password is empty!")
 
 			return
-		} else if binary.Size([]byte(uf.AesKey)) != 32 {
-			a.responseWithError(400, map[string]string{"message": "password is not equal to 32 bytes"}, "password is not equal to 32 bytes. AesKey length:" + string(binary.Size([]byte(uf.AesKey))))
+		} else if binary.Size([]byte(uf.AesKey)) < 8 {
+			a.responseWithError(400, map[string]string{"message": "password is less to 8 bytes"}, "password is less to 8 bytes. AesKey length:" + string(binary.Size([]byte(uf.AesKey))))
 
 			return
 		}
 
 		//	register wallet in blockchain
-		req := httplib.Post("http://127.0.0.1:4000/wallet/new")
-
-		str, err := req.String()
-		if err != nil {
-			a.responseWithError(500, map[string]string{"message": err.Error()}, err)
-
-			return
-		}
+		//req := httplib.Post("http://127.0.0.1:4000/wallet/new")
+		//
+		//str, err := req.String()
+		//if err != nil {
+		//	a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+		//
+		//	return
+		//}
 
 		//	get credentials
-		ub := UserSignUp{}
-		err = json.Unmarshal([]byte(str), &ub)
-		if err != nil {
-			a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
-			return
+		ub := UserSignUp{
+			PrivateKey : "41231138379285447493302265597214546813891011119270412319121697719018707223399",
+			PublicKey : "14868046059215250896028577020428367825674010679948899014672678699988209453275",
+			Address : "1JoPHwPYKLEhwaApUfrPLSPhEzzZR8cZB7",
+			AesKey : services.GetMD5Hash(uf.AesKey),
 		}
+		//err = json.Unmarshal([]byte(str), &ub)
+		//if err != nil {
+		//	a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+		//
+		//	return
+		//}
 
 		//	Encode private key
-		csk, err := services.GetAESEncode(ub.PrivateKey, uf.AesKey)
+
+		csk, err := services.GetAESEncode(ub.PrivateKey, services.GetMD5Hash(uf.AesKey))
+
 		if err != nil {
 			a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
@@ -211,8 +161,7 @@ func (a *AuthController) UserSignIn() {
 	}
 
 	//	decode Private Key
-	csk, err := services.GetAESDecode(u.PrivateKey, uf.AesKey)
-
+	csk, err := services.GetAESDecode(u.PrivateKey, services.GetMD5Hash(uf.AesKey))
 	if err != nil {
 		a.responseWithError(400, map[string]string{"message": err.Error()}, err)
 
@@ -249,7 +198,7 @@ func (a *AuthController) AdminSignIn() {
 		a.Data["errorMessage"] = err.Error()
 	}
 
-	if adm.PublicKey == "" || adm.AesKey == "" || binary.Size([]byte(adm.AesKey)) != 32 {
+	if adm.PublicKey == "" || adm.AesKey == "" {
 		if adm.PublicKey == "" {
 			beego.Error("Your public key is empty")
 			a.Data["errorMessage"] = "Your public key is empty"
@@ -257,8 +206,8 @@ func (a *AuthController) AdminSignIn() {
 		if adm.AesKey == "" {
 			beego.Error("Your aes key is empty")
 			a.Data["errorMessage2"] = "Your password is empty"
-		} else if binary.Size([]byte(adm.AesKey)) != 32 {
-			a.responseWithError(400, map[string]string{"message": "password is not equal to 32 bytes"}, "password is not equal to 32 bytes. AesKey length:"+string(binary.Size([]byte(adm.AesKey))))
+		} else if binary.Size([]byte(adm.AesKey)) < 8 {
+			a.responseWithError(400, map[string]string{"message": "password is not equal to 8 bytes"}, "password is not equal to 8 bytes. AesKey length:"+string(binary.Size([]byte(adm.AesKey))))
 		}
 
 		a.TplName = "auth/index.tpl"
@@ -281,8 +230,9 @@ func (a *AuthController) AdminSignIn() {
 	}
 
 	//	decode Private Key
-	csk, err := services.GetAESDecode(u.PrivateKey, adm.AesKey)
 
+	csk, err := services.GetAESDecode(u.PrivateKey, services.GetMD5Hash(adm.AesKey))
+beego.Warn(csk)
 	if err != nil {
 		beego.Error(err)
 		a.Data["errorMessage2"] = err.Error()

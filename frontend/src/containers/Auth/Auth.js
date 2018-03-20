@@ -44,7 +44,7 @@ class Auth extends Component {
                 value: '',
                 validation: {
                     required: true,
-                    length: 32,
+                    //length: 32,
                 },
                 valid: false,
                 touched: false,

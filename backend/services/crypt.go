@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"crypto/md5"
 )
 
 const (
@@ -24,7 +25,15 @@ func GetHash(data string) string {
 	out := fmt.Sprintf("%s%s%s", presalt, data, postsalt)
 	io.WriteString(h256, out)
 
-	return fmt.Sprintf("%x\n", h256.Sum(nil))
+	return fmt.Sprintf("%x", h256.Sum(nil))
+}
+
+func GetMD5Hash(data string) string {
+	h256 := md5.New()
+	out := fmt.Sprintf("%s%s%s", presalt, data, postsalt)
+	io.WriteString(h256, out)
+
+	return fmt.Sprintf("%x", h256.Sum(nil))
 }
 
 func GetAESEncode(data string, aesKey string) (string, error) {
