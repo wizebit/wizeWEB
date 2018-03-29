@@ -77,7 +77,7 @@ func (c *HelloAPIController) Post() {
 		}
 
 		c.Data["json"] = map[string]interface{}{
-			"suspicios":    getTotalBC(),
+			"suspicious":    getTotalBC(),
 			"totalBC":      id,
 			"bcNodes":      id,
 			"raftNodes":    id,
@@ -100,7 +100,7 @@ func (c *HelloAPIController) Post() {
 			"id":    id,
 		}
 	default:
-		c.responseWithError(400, map[string]string{"message": "not permited"}, "not permited")
+		c.responseWithError(403, map[string]string{"message": "Permission denied"}, "Permission denied")
 		return
 	}
 
