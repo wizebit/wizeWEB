@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/graphql-go/graphql/language/ast"
 	"time"
 )
 
@@ -10,13 +9,22 @@ type Users struct {
 	PrivateKey string `orm:"column(private_key);unique"`
 	PublicKey  string `orm:"column(public_key);unique"`
 	Address    string `orm:"column(address);unique"`
+	Password   string
 	Status     bool
-	Role       int
+	Role       int //role of user - see const below
 	Rate       int
-	CreatedAt  time.Time `orm:"column(created_at);type(timestamp);auto_now_add"`
-	UpdatedAt  time.Time `orm:"column(updated_at);type(timestamp);auto_now"`
-	SessionKey string    `orm:"column(session_key)"`
+	Servers    []*Servers `orm:"reverse(many)"`
+	CreatedAt  time.Time  `orm:"column(created_at);type(timestamp);auto_now_add"`
+	UpdatedAt  time.Time  `orm:"column(updated_at);type(timestamp);auto_now"`
+	SessionKey string     `orm:"column(session_key)"`
 }
+
+const (
+	USER_SUPERADMIN = 0
+	USER_MANAGER    = 10
+	USER_CUSTOMER   = 20
+	USER_GUEST      = 30
+)
 
 type BugReports struct {
 	Id        int `orm:"pk;column(id);auto"`
@@ -29,6 +37,7 @@ type BugReports struct {
 
 type Servers struct {
 	Id        int            `orm:"pk;column(id);auto"`
+	UserId    Users          `orm:"rel(one)"`
 	State     []*ServerState `orm:"reverse(many)"`
 	Name      string         //Unique id of server, maybe address of init wallet //TODO: придумать это
 	Url       string         // Address of server maybe node1.wizebit.com for example
@@ -39,7 +48,7 @@ type Servers struct {
 
 type ServerState struct {
 	Id          int      `orm:"pk;column(id);auto"`
-	Server      *Servers `orm:"rel(one)"`
+	ServerId    *Servers `orm:"rel(one)"`
 	Ip          string   // IP of server, can be different, must monitoring this
 	Status      bool     // up/down - true/false
 	Latency     int      // in ms by ping?
@@ -48,7 +57,7 @@ type ServerState struct {
 	TypeActive  string   // out/in for different type of monitoring -active/passive
 	Rate        int      // calculated rate of server in moment
 	// if status = false {Rate = 0}
-	// else Rate = 0,2*FreeStorage/max.FreeStorage+0,3*Uptime/max.Uptime+
-	// +0,1*min.Latency/Latency+TypeActive*0,4
+	// else Rate = 0,2*FreeStorage/max.FreeStorage + 0,3*Uptime/max.Uptime +
+	// + 0,1*min.Latency/Latency + TypeActive*0,4
 	CreatedAt time.Time `orm:"column(created_at);type(timestamp);auto_now_add"`
 }

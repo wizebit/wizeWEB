@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -9,8 +10,6 @@ import (
 	"strings"
 	"wizeweb/backend/models"
 	"wizeweb/backend/services"
-	"encoding/binary"
-
 )
 
 type AuthController struct {
@@ -22,21 +21,21 @@ var sessionName = beego.AppConfig.String("SessionName")
 //	register form json structure
 type UserSignUp struct {
 	PrivateKey string `json:"privkey"`
-	PublicKey string `json:"pubkey"`
-	Address string `json:"address"`
-	AesKey string `json:"aesKey"`
+	PublicKey  string `json:"pubkey"`
+	Address    string `json:"address"`
+	AesKey     string `json:"aesKey"`
 }
 
 //	login json form will have structure
 type User struct {
 	PublicKey string `json:"publicKey"`
-	AesKey string `json:"aesKey"`
+	AesKey    string `json:"aesKey"`
 }
 
 //	auth form for admin panel
 type Admin struct {
 	PublicKey string `form:"public_key"`
-	AesKey string `form:"aes_key"`
+	AesKey    string `form:"aes_key"`
 }
 
 func (a *AuthController) responseWithError(status int, message map[string]string, err interface{}) {
@@ -50,84 +49,83 @@ func (a *AuthController) responseWithError(status int, message map[string]string
 	return
 }
 
-
 func (a *AuthController) SignUp() {
-		//	get body of request (for aes key)
-		uf := UserSignUp{}
-		json.Unmarshal(a.Ctx.Input.RequestBody, &uf)
+	//	get body of request (for aes key)
+	uf := UserSignUp{}
+	json.Unmarshal(a.Ctx.Input.RequestBody, &uf)
 
-		if uf.AesKey == "" {
-			a.responseWithError(400, map[string]string{"message": "password is empty"}, "password is empty!")
+	if uf.AesKey == "" {
+		a.responseWithError(400, map[string]string{"message": "password is empty"}, "password is empty!")
 
-			return
-		} else if binary.Size([]byte(uf.AesKey)) < 8 {
-			a.responseWithError(400, map[string]string{"message": "password is less to 8 bytes"}, "password is less to 8 bytes. AesKey length:" + string(binary.Size([]byte(uf.AesKey))))
+		return
+	} else if binary.Size([]byte(uf.AesKey)) < 8 {
+		a.responseWithError(400, map[string]string{"message": "password is less to 8 bytes"}, "password is less to 8 bytes. AesKey length:"+string(binary.Size([]byte(uf.AesKey))))
 
-			return
-		}
+		return
+	}
 
-		//	register wallet in blockchain
-		//req := httplib.Post("http://127.0.0.1:4000/wallet/new")
-		//
-		//str, err := req.String()
-		//if err != nil {
-		//	a.responseWithError(500, map[string]string{"message": err.Error()}, err)
-		//
-		//	return
-		//}
+	//	register wallet in blockchain
+	//req := httplib.Post("http://127.0.0.1:4000/wallet/new")
+	//
+	//str, err := req.String()
+	//if err != nil {
+	//	a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+	//
+	//	return
+	//}
 
-		//	get credentials
+	//	get credentials
 
-		ub := UserSignUp{
-			PrivateKey : "41231138379285447493302265597214546813891011119270412319121697719018707223399",
-			PublicKey : "14868046059215250896028577020428367825674010679948899014672678699988209453275",
-			Address : "1JoPHwPYKLEhwaApUfrPLSPhEzzZR8cZB7",
-			AesKey : services.GetMD5Hash(uf.AesKey),
-		}
-		//err = json.Unmarshal([]byte(str), &ub)
-		//if err != nil {
-		//	a.responseWithError(500, map[string]string{"message": err.Error()}, err)
-		//
-		//	return
-		//}
+	ub := UserSignUp{
+		PrivateKey: "41231138379285447493302265597214546813891011119270412319121697719018707223399",
+		PublicKey:  "14868046059215250896028577020428367825674010679948899014672678699988209453275",
+		Address:    "1JoPHwPYKLEhwaApUfrPLSPhEzzZR8cZB7",
+		AesKey:     services.GetMD5Hash(uf.AesKey),
+	}
+	//err = json.Unmarshal([]byte(str), &ub)
+	//if err != nil {
+	//	a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+	//
+	//	return
+	//}
 
-		//	Encode private key
+	//	Encode private key
 
-		csk, err := services.GetAESEncode(ub.PrivateKey, services.GetMD5Hash(uf.AesKey))
+	csk, err := services.GetAESEncode(ub.PrivateKey, services.GetMD5Hash(uf.AesKey))
 
-		if err != nil {
-			a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+	if err != nil {
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
-			return
-		}
+		return
+	}
 
-		//	create user in DB
-		u := new(models.Users)
-		u.PrivateKey = csk
-		u.PublicKey = ub.PublicKey
-		u.Address = ub.Address
-		u.Role = 20
+	//	create user in DB
+	u := new(models.Users)
+	u.PrivateKey = csk
+	u.PublicKey = ub.PublicKey
+	u.Address = ub.Address
+	u.Role = 20
 
-		o := orm.NewOrm()
-		o.Using("default")
+	o := orm.NewOrm()
+	o.Using("default")
 
-		_, err = o.Insert(u)
+	_, err = o.Insert(u)
 
-		if err != nil {
-			a.responseWithError(500, map[string]string{"message": err.Error()}, err)
+	if err != nil {
+		a.responseWithError(500, map[string]string{"message": err.Error()}, err)
 
-			return
-		}
+		return
+	}
 
-		//	return result
-		a.Data["json"] = map[string]interface{}{
-			"privateKey":	ub.PrivateKey,
-			"publicKey": ub.PublicKey,
-			"address": ub.Address,
-			"password": uf.AesKey,
-		}
-		a.ServeJSON()
-		a.StopRun()
+	//	return result
+	a.Data["json"] = map[string]interface{}{
+		"privateKey": ub.PrivateKey,
+		"publicKey":  ub.PublicKey,
+		"address":    ub.Address,
+		"password":   uf.AesKey,
+	}
+	a.ServeJSON()
+	a.StopRun()
 }
 
 func (a *AuthController) UserSignIn() {
@@ -179,8 +177,8 @@ func (a *AuthController) UserSignIn() {
 
 	token, expiresIn, err := services.CreateSignedTokenString(hashKey)
 	a.Data["json"] = map[string]interface{}{
-		"accessToken":   token,
-		"expiresIn": expiresIn,
+		"accessToken": token,
+		"expiresIn":   expiresIn,
 	}
 	a.ServeJSON()
 	a.StopRun()
@@ -232,7 +230,7 @@ func (a *AuthController) AdminSignIn() {
 	//	decode Private Key
 
 	csk, err := services.GetAESDecode(u.PrivateKey, services.GetMD5Hash(adm.AesKey))
-beego.Warn(csk)
+	beego.Warn(csk)
 	if err != nil {
 		beego.Error(err)
 		a.Data["errorMessage2"] = err.Error()
@@ -268,7 +266,7 @@ func (a *AuthController) AdminSignOut() {
 //	customize filters for fine grain authorization
 var FilterUser = func(ctx *context.Context) {
 	//	Unauthorised requests
-	if strings.HasPrefix(ctx.Input.URL(), "/auth") || strings.HasPrefix(ctx.Input.URL(), "/storage") {
+	if strings.HasPrefix(ctx.Input.URL(), "/hello") || strings.HasPrefix(ctx.Input.URL(), "/auth") || strings.HasPrefix(ctx.Input.URL(), "/storage") {
 		return
 	}
 

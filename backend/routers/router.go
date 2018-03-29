@@ -12,6 +12,11 @@ func init() {
 	//	API
 	beego.Router("/auth/sign-up", &controllers.AuthController{}, "post:SignUp")
 	beego.Router("/auth/sign-in", &controllers.AuthController{}, "post:UserSignIn")
+	//Hello request
+	//
+	// API
+	beego.Router("/hello/:id([a-z]+)", &controllers.HelloAPIController{}, "post:Post")
+
 	//
 	//	Admin panel
 	beego.Router("/auth/admin", &controllers.AuthController{}, "get:AdminAuth")

@@ -14,6 +14,18 @@ CREATE TABLE server_state (
   Created_at TIMESTAMP
 );
 
+INSERT INTO server_state (Server_id, Ip, Latency, Free_storage, Uptime, Created_at) VALUES
+    ('1','127.0.0.1','100','100','100',NOW()),
+    ('2','127.0.0.1','100','100','100',NOW()),
+    ('3','127.0.0.1','100','100','100',NOW()),
+    ('4','127.0.0.1','100','100','100',NOW()),
+    ('5','127.0.0.1','100','100','100',NOW()),
+    ('6','127.0.0.1','100','100','100',NOW()),
+    ('7','127.0.0.1','100','100','100',NOW()),
+    ('8','127.0.0.1','100','100','100',NOW()),
+    ('4','127.0.0.1','100','100','10',NOW()),
+    ('5','127.0.0.1','100','100','1000',NOW());
+
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back
 
