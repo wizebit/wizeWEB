@@ -82,7 +82,7 @@ func (c *HelloAPIController) Post() {
 				return
 			}
 			c.Data["json"] = map[string]interface{}{
-				"suspicious":    suspicios,
+				"suspicious":   suspicios,
 				"bcNodes":      bcNodes,
 				"raftNodes":    raftNodes,
 				"storageNodes": storageNodes,

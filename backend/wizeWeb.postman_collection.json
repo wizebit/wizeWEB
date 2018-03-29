@@ -1,0 +1,33 @@
+{
+	"info": {
+		"_postman_id": "c432466f-b826-6640-0381-cf05f56d7f5f",
+		"name": "wizeWeb",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "hello",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"Address\": \"One\",\n\t\"PubKey\": \"two\",\n\t\"AES\": \"test\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8888/hello/application",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8888",
+					"path": [
+						"hello",
+						"application"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
