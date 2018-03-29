@@ -61,3 +61,22 @@ type ServerState struct {
 	// + 0,1*min.Latency/Latency + TypeActive*0,4
 	CreatedAt time.Time `orm:"column(created_at);type(timestamp);auto_now_add"`
 }
+
+type ServerList struct {
+	UserId      int
+	SId         int
+	Ip          string
+	Status      bool
+	Latency     int
+	FreeStorage int
+	Uptime      int
+	Rate        int
+	CreatedAt   time.Time
+}
+
+type ServerStateCount struct {
+	TotalBlockchainCount int
+	TotalRaftCount       int
+	TotalStorageCount    int
+	TotalSuspiciosCount  int
+}

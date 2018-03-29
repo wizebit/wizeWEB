@@ -20,4 +20,4 @@ CREATE VIEW serverListView AS
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back
-DROP VIEW IF EXISTS serverListView
+DROP VIEW serverListView;
