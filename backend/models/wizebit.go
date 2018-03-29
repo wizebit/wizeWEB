@@ -13,10 +13,9 @@ type Users struct {
 	Status     bool
 	Role       int //role of user - see const below
 	Rate       int
-	Servers    []*Servers `orm:"reverse(many)"`
-	CreatedAt  time.Time  `orm:"column(created_at);type(timestamp);auto_now_add"`
-	UpdatedAt  time.Time  `orm:"column(updated_at);type(timestamp);auto_now"`
-	SessionKey string     `orm:"column(session_key)"`
+	CreatedAt  time.Time `orm:"column(created_at);type(timestamp);auto_now_add"`
+	UpdatedAt  time.Time `orm:"column(updated_at);type(timestamp);auto_now"`
+	SessionKey string    `orm:"column(session_key)"`
 }
 
 const (
@@ -36,14 +35,13 @@ type BugReports struct {
 }
 
 type Servers struct {
-	Id        int            `orm:"pk;column(id);auto"`
-	UserId    Users          `orm:"rel(one)"`
-	State     []*ServerState `orm:"reverse(many)"`
-	Name      string         //Unique id of server, maybe address of init wallet //TODO: придумать это
-	Url       string         // Address of server maybe node1.wizebit.com for example
-	Role      string         // Role of server - Blockchain, Raft, Storage
-	CreatedAt time.Time      `orm:"column(created_at);type(timestamp);auto_now_add"`
-	UpdatedAt time.Time      `orm:"column(updated_at);type(timestamp);auto_now"`
+	Id        int       `orm:"pk;column(id);auto"`
+	UserId    *Users    `orm:"rel(one)"`
+	Name      string    //Unique id of server, maybe address of init wallet //TODO: придумать это
+	Url       string    // Address of server maybe node1.wizebit.com for example
+	Role      string    // Role of server - Blockchain, Raft, Storage
+	CreatedAt time.Time `orm:"column(created_at);type(timestamp);auto_now_add"`
+	UpdatedAt time.Time `orm:"column(updated_at);type(timestamp);auto_now"`
 }
 
 type ServerState struct {
@@ -63,6 +61,7 @@ type ServerState struct {
 }
 
 type ServerList struct {
+	Id          int
 	UserId      int
 	SId         int
 	Ip          string
@@ -75,6 +74,7 @@ type ServerList struct {
 }
 
 type ServerStateCount struct {
+	Id                   int
 	TotalBlockchainCount int
 	TotalRaftCount       int
 	TotalStorageCount    int

@@ -12,8 +12,8 @@ import (
 	//"google.golang.org/grpc"
 	//pb "bitbucket.org/udt/wizefs/grpc/wizefsservice"
 	//"golang.org/x/net/context"
-	"os"
 	"io/ioutil"
+	"os"
 )
 
 //var (
@@ -37,6 +37,10 @@ func ormInit() {
 	orm.RegisterModel(
 		new(models.Users),
 		new(models.BugReports),
+		new(models.Servers),
+		new(models.ServerList),
+		new(models.ServerState),
+		new(models.ServerStateCount),
 	)
 }
 
@@ -98,52 +102,50 @@ func readFile(filename string) (content []byte, err error) {
 //		beego.Error(err)
 //	}
 
-
-
-	//// Put
-	//filepath := "/home/anthony/code/test/test/test.txt"
-	//content, err := readFile(filepath)
-	//if err == nil {
-	//	beego.Info("Request content: \n%s\n", content)
-	//
-	//	beego.Info("Request: Put. Origin: %s", origin)
-	//	respPut, err := client.Put(context.Background(),
-	//		&pb.PutRequest{
-	//			Filename: "test.txt",
-	//			Content:  content,
-	//			Origin:   origin,
-	//		})
-	//	beego.Info("Response: %v. Error: %v", respPut, err)
-	//}
-	//
-	//time.Sleep(3 * time.Second)
-	//
-	//// Get
-	//if err == nil {
-	//	beego.Info("Request: Get. Origin: %s", origin)
-	//	respGet, err := client.Get(context.Background(),
-	//		&pb.GetRequest{
-	//			Filename: "test.txt",
-	//			Origin:   origin,
-	//		})
-	//	beego.Info("Error: %v", err)
-	//	beego.Info("Response message: %s.", respGet.Message)
-	//	beego.Info("Response contentb: \n%s\n", respGet.Content)
-	//}
-	//
-	//time.Sleep(3 * time.Second)
-	//
-	//// Unmount
-	//beego.Info("Request: Unmount. Origin: %s", origin)
-	//resp, err = client.Unmount(context.Background(), &pb.FilesystemRequest{Origin: origin})
-	//beego.Info("Response: %v. Error: %v", resp, err)
-	//
-	//time.Sleep(3 * time.Second)
-	//
-	//// Delete
-	//beego.Info("Request: Delete. Origin: %s", origin)
-	//resp, err = client.Delete(context.Background(), &pb.FilesystemRequest{Origin: origin})
-	//beego.Info("Response: %v. Error: %v", resp, err)
+//// Put
+//filepath := "/home/anthony/code/test/test/test.txt"
+//content, err := readFile(filepath)
+//if err == nil {
+//	beego.Info("Request content: \n%s\n", content)
+//
+//	beego.Info("Request: Put. Origin: %s", origin)
+//	respPut, err := client.Put(context.Background(),
+//		&pb.PutRequest{
+//			Filename: "test.txt",
+//			Content:  content,
+//			Origin:   origin,
+//		})
+//	beego.Info("Response: %v. Error: %v", respPut, err)
+//}
+//
+//time.Sleep(3 * time.Second)
+//
+//// Get
+//if err == nil {
+//	beego.Info("Request: Get. Origin: %s", origin)
+//	respGet, err := client.Get(context.Background(),
+//		&pb.GetRequest{
+//			Filename: "test.txt",
+//			Origin:   origin,
+//		})
+//	beego.Info("Error: %v", err)
+//	beego.Info("Response message: %s.", respGet.Message)
+//	beego.Info("Response contentb: \n%s\n", respGet.Content)
+//}
+//
+//time.Sleep(3 * time.Second)
+//
+//// Unmount
+//beego.Info("Request: Unmount. Origin: %s", origin)
+//resp, err = client.Unmount(context.Background(), &pb.FilesystemRequest{Origin: origin})
+//beego.Info("Response: %v. Error: %v", resp, err)
+//
+//time.Sleep(3 * time.Second)
+//
+//// Delete
+//beego.Info("Request: Delete. Origin: %s", origin)
+//resp, err = client.Delete(context.Background(), &pb.FilesystemRequest{Origin: origin})
+//beego.Info("Response: %v. Error: %v", resp, err)
 //}
 
 func main() {

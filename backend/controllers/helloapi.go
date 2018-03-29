@@ -75,15 +75,24 @@ func (c *HelloAPIController) Post() {
 			c.responseWithError(400, map[string]string{"message": err.Error()}, err)
 			return
 		}
-
-		c.Data["json"] = map[string]interface{}{
-			"suspicios":    getTotalBC(),
-			"totalBC":      id,
-			"bcNodes":      id,
-			"raftNodes":    id,
-			"storageNodes": id,
-			"spaceleft":    0,
+		if u.Password == services.GetHash(ob.AES) {
+			bcNodes, raftNodes, storageNodes, suspicios, err := getTotals()
+			if err != nil { // if others error
+				c.responseWithError(400, map[string]string{"message": err.Error()}, err)
+				return
+			}
+			c.Data["json"] = map[string]interface{}{
+				"suspicios":    suspicios,
+				"bcNodes":      bcNodes,
+				"raftNodes":    raftNodes,
+				"storageNodes": storageNodes,
+				"spaceleft":    0,
+			}
+		} else {
+			c.responseWithError(400, map[string]string{"message": "not permited"}, "not permited")
+			return
 		}
+
 	case "blockchain":
 		c.Data["json"] = map[string]interface{}{
 			"hello": ob,
@@ -108,22 +117,15 @@ func (c *HelloAPIController) Post() {
 	c.StopRun()
 }
 
-func getTotalBC() int {
+func getTotals() (int, int, int, int, error) {
 	o := orm.NewOrm()
 	o.Using("default")
-	err := o.QueryTable("servers").Filter("public_key", ob.PubKey).Limit(1).One(&u)
-	if err != nil { // if others error
-		return 0
-	}
+	var counts *models.ServerStateCount
+	err := o.Raw("SELECT * FROM serverCountView").QueryRow(&counts)
 
-	return 1
-}
-func getSuspiciosBC() int {
-	return 1
-}
-func getStorageTotal() int {
-	return 1
-}
-func getSpaceLeft() int {
-	return 1000
+	if err != nil { // if others error
+		return 0, 0, 0, 0, err
+	} else {
+		return counts.TotalBlockchainCount, counts.TotalRaftCount, counts.TotalStorageCount, counts.TotalSuspiciosCount, nil
+	}
 }
