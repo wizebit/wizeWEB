@@ -76,16 +76,40 @@ func (c *HelloAPIController) Post() {
 			return
 		}
 		if u.Password == services.GetHash(ob.AES) {
-			bcNodes, raftNodes, storageNodes, suspicios, err := getTotals()
+			bcNodes, _, _, suspicios, err := getTotals()
 			if err != nil { // if others error
 				c.responseWithError(400, map[string]string{"message": err.Error()}, err)
 				return
 			}
+			blockchain, err := getServerList("blockchain")
+			if err != nil { // if others error
+				c.responseWithError(400, map[string]string{"message": err.Error()}, err)
+				return
+			}
+			bc, _ := json.Marshal(blockchain)
+
+			var dat []string
+			json.Unmarshal(bc, &dat)
+			beego.Warn(dat)
+
+			raft, err := getServerList("raft")
+			if err != nil { // if others error
+				c.responseWithError(400, map[string]string{"message": err.Error()}, err)
+				return
+			}
+			rf, _ := json.Marshal(raft)
+			storage, err := getServerList("storage")
+			if err != nil { // if others error
+				c.responseWithError(400, map[string]string{"message": err.Error()}, err)
+				return
+			}
+			st, _ := json.Marshal(storage)
 			c.Data["json"] = map[string]interface{}{
 				"suspicious":   suspicios,
-				"bcNodes":      bcNodes,
-				"raftNodes":    raftNodes,
-				"storageNodes": storageNodes,
+				"totalNodes":   bcNodes,
+				"bcNodes":      bc,
+				"raftNodes":    rf,
+				"storageNodes": st,
 				"spaceleft":    0,
 			}
 		} else {
@@ -128,4 +152,19 @@ func getTotals() (int, int, int, int, error) {
 	} else {
 		return counts.TotalBlockchainCount, counts.TotalRaftCount, counts.TotalStorageCount, counts.TotalSuspiciosCount, nil
 	}
+}
+
+func getServerList(t string) ([]string, error) {
+	o := orm.NewOrm()
+	o.Using("default")
+	var list []string
+	num, err := o.Raw("SELECT url FROM serverListView WHERE role=?", t).QueryRows(&list)
+	beego.Warn(list)
+	beego.Error(err)
+	if err == nil && num > 0 { // if others error
+		return list, err
+	} else {
+		return nil, err
+	}
+
 }
