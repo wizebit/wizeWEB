@@ -86,30 +86,24 @@ func (c *HelloAPIController) Post() {
 				c.responseWithError(400, map[string]string{"message": err.Error()}, err)
 				return
 			}
-			bc, _ := json.Marshal(blockchain)
-
-			var dat []string
-			json.Unmarshal(bc, &dat)
-			beego.Warn(dat)
 
 			raft, err := getServerList("raft")
 			if err != nil { // if others error
 				c.responseWithError(400, map[string]string{"message": err.Error()}, err)
 				return
 			}
-			rf, _ := json.Marshal(raft)
+
 			storage, err := getServerList("storage")
 			if err != nil { // if others error
 				c.responseWithError(400, map[string]string{"message": err.Error()}, err)
 				return
 			}
-			st, _ := json.Marshal(storage)
 			c.Data["json"] = map[string]interface{}{
 				"suspicious":   suspicios,
 				"totalNodes":   bcNodes,
-				"bcNodes":      bc,
-				"raftNodes":    rf,
-				"storageNodes": st,
+				"bcNodes":      blockchain,
+				"raftNodes":    raft,
+				"storageNodes": storage,
 				"spaceleft":    0,
 			}
 		} else {
