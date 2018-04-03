@@ -1,0 +1,5 @@
+---
+# Directory to install application (without "/" at the end)
+app_dir: /home/ubuntu
+# User for application (should have sudo privileges)
+app_user: ubuntu
