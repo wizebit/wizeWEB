@@ -1,0 +1,5 @@
+dbserver = 127.0.0.1
+dbport = 54320
+dbname = wizebit
+dbuser = homestead
+dbpassword = secret

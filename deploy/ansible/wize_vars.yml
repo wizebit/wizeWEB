@@ -3,3 +3,8 @@
 app_dir: /home/ubuntu
 # User for application (should have sudo privileges)
 app_user: ubuntu
+
+# Database vars
+dbname: wize
+dbuser: wize
+dbpass: wize_user_pass
