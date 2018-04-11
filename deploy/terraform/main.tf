@@ -182,10 +182,27 @@ resource "google_compute_firewall" "www" {
 
   allow {
     protocol = "tcp"
-    ports = ["80", "443"]
+    ports = ["80", "443", "8888"]
   }
 
   source_ranges = ["0.0.0.0/0"]
   target_tags = ["www-node"]
+}
+
+#########################################
+
+resource "google_dns_record_set" "www" {
+  name = "master.${google_dns_managed_zone.wize.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.wize.name}"
+
+  rrdatas = ["${google_compute_instance.www.network_interface.0.access_config.0.assigned_nat_ip}"]
+}
+
+resource "google_dns_managed_zone" "wize" {
+  name     = "wizebit"
+  dns_name = "wizeprotocol.com."
 }
 

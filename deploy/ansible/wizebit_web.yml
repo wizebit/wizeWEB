@@ -221,6 +221,9 @@
     - name: build wizeweb frontend
       shell: cd ~/go/src/wizeweb/frontend; npm install; npm run build
 
+    - name: install goose
+      shell: /usr/local/go/bin/go get bitbucket.org/liamstask/goose/cmd/goose
+
 # RUN APPLICATION
 #    - name: Run wizeBlock
 #      shell: cd ~/wizeblock && bash ./start_cluster.sh
