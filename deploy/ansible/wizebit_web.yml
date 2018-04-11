@@ -195,7 +195,7 @@
         dest: ~/go/src/wizeblock
         force: true
         accept_hostkey: yes
-        version: master
+        version: prod
 
     - name: Clone wizeFS repository
       git:
