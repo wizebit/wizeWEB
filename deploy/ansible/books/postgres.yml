@@ -1,0 +1,21 @@
+# Install PostgreSQL
+- name: Adding PostgreSQL repository
+  apt_repository: repo="deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" state=present
+
+- name: Importing PostgreSQL repository signing key
+  apt_key: url="https://www.postgresql.org/media/keys/ACCC4CF8.asc" state=present
+
+- name: Installing PostgreSQL prerequisites
+  apt: name={{ item }} state=latest update_cache=yes
+  with_items:
+    - libpq-dev
+    - python-psycopg2
+    - postgresql-common
+    - postgresql-contrib
+    - python-passlib
+
+- name: Installing PostgreSQL
+  apt: pkg=postgresql-10 update_cache=yes
+
+- name: Run PostgreSQL service
+  service: name=postgresql state=started enabled=yes

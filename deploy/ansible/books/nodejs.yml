@@ -1,0 +1,10 @@
+# INSTALL NODEJS, NPM
+- name: Adding the PPA for Node.js
+  shell: curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+  args:
+    warn: false
+
+- name: Install Node.js, npm
+  become: true
+  apt: name=nodejs state=latest update_cache=yes
+#      shell: sudo apt install nodejs

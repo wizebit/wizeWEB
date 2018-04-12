@@ -1,0 +1,16 @@
+# INSTALL DOCKER CE
+- name: Add the GPG key
+  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+  args:
+    warn: false
+
+- name: Add repository
+  shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+- name: Install Docker CE
+  apt: name=docker-ce state=latest update_cache=yes
+
+- name: Install Docker Compose
+  shell: curl -L https://github.com/docker/compose/releases/download/1.20.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+  args:
+    warn: false

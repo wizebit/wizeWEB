@@ -1,0 +1,32 @@
+# PREPARE SSH KEY FOR REPOSITORY
+- name: Create SSH directory
+  file:
+    path: ~/.ssh
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: 0700
+
+- name: Copy SSH key
+  copy:
+    src: ssh/wize_web
+    dest: ~/.ssh/wize_web
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: 0600
+
+- name: Create SSH config file
+  file:
+    path: ~/.ssh/config
+    state: touch
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: 0644
+
+- name: Force key through config
+  blockinfile:
+    path: ~/.ssh/config
+    block: |
+      Host bitbucket
+          HostName bitbucket.org
+          IdentityFile ~/.ssh/wize_web

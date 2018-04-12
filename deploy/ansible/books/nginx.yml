@@ -1,0 +1,21 @@
+# Install Nginx
+- name: Add Nginx repository
+  apt_repository: repo="ppa:nginx/stable" state=present
+
+- name: Install Nginx
+  apt: pkg=nginx state=latest update_cache=yes
+
+# System boot config
+- name: Enable Nginx on sys boot
+  service: name=nginx enabled=yes
+
+- name: Copy  nginx config
+  copy:
+    src: configs/default
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Retart Nginx
+  service: name=nginx state=restarted
