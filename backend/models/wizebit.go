@@ -13,9 +13,10 @@ type Users struct {
 	Status     bool
 	Role       int //role of user - see const below
 	Rate       int
-	CreatedAt  time.Time `orm:"column(created_at);type(timestamp);auto_now_add"`
-	UpdatedAt  time.Time `orm:"column(updated_at);type(timestamp);auto_now"`
-	SessionKey string    `orm:"column(session_key)"`
+	CreatedAt  time.Time  `orm:"column(created_at);type(timestamp);auto_now_add"`
+	UpdatedAt  time.Time  `orm:"column(updated_at);type(timestamp);auto_now"`
+	SessionKey string     `orm:"column(session_key)"`
+	Servers    []*Servers `orm:"reverse(many)"`
 }
 
 const (
@@ -36,7 +37,7 @@ type BugReports struct {
 
 type Servers struct {
 	Id        int       `orm:"pk;column(id);auto"`
-	UserId    *Users    `orm:"rel(one)"`
+	User      *Users    `orm:"rel(fk);column(user_id)"`
 	Name      string    //Unique id of server, maybe address of init wallet //TODO: придумать это
 	Url       string    // Address of server maybe node1.wizebit.com for example
 	Role      string    // Role of server - Blockchain, Raft, Storage

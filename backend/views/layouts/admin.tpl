@@ -6,7 +6,7 @@
 
 {{ define "content" }}
     <aside class="admin-sidebar">
-        {{ template "partials/aside.tpl" }}
+        {{ template "partials/aside.html" }}
     </aside>
     <article>
         {{ block "layout-content" . }}{{ end }}

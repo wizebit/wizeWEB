@@ -22,7 +22,6 @@ func init() {
 	beego.Router("/auth/admin", &controllers.AuthController{}, "get:AdminAuth")
 	beego.Router("/auth/admin/sign-in", &controllers.AuthController{}, "post:AdminSignIn")
 	beego.Router("/auth/admin/sign-out", &controllers.AuthController{}, "get:AdminSignOut")
-
 	//	Authorised requests
 	//
 	//	API
@@ -41,6 +40,8 @@ func init() {
 
 	//	Admin panel
 	beego.Router("/admin", &controllers.AdminController{}, "get:Index")
+	beego.Router("/admin/serverslist", &controllers.AdminController{}, "get:ServerList")
+	beego.Router("/admin/users", &controllers.AdminController{}, "get:UsersList")
 	//
 	//	Router MiddleWares
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{

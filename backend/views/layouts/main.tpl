@@ -7,6 +7,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" href="/static/css/app.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
         {{ block "css" . }}{{ end }}
     </head>
     <body>
@@ -17,8 +18,9 @@
 
         {{ block "footer" . }}{{ end }}
 
-        {{/*<script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>*/}}
-        {{/*<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>*/}}
+        <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+        <script src="http://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
         {{ block "js" . }}{{ end }}
     </body>
 </html>

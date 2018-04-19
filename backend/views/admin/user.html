@@ -1,0 +1,72 @@
+{{ template "layouts/admin.tpl" . }}
+
+{{ define "layout-content" }}
+<div class="panel-group">
+<div class="panel panel-default" style="background-color: inherit">
+  <div class="panel-heading">
+    <h4>Users</h4>
+  </div>
+  <div class="panel-body">
+    <table class="table" id="usersTable" cellspacing="0" width="100%">
+      <thead>
+      <tr style="background-color: inherit">
+        <th>Id</th>
+        <th>PublicKey</th>
+        <th>Address</th>
+        <th>Status</th>
+        <th>Role</th>
+        <th>Created At</th>
+      </tr>
+      </thead>
+
+      {{range $key, $user := .records}}
+      <tr data-href="/admin/user/{{$user.Id}}/servers" style="background-color: inherit">
+          <td>{{$user.Id}}</td>
+          <td>{{$user.PublicKey}}</td>
+          <td>{{$user.Address}}</td>
+          <td>{{$user.Status}}</td>
+          <td>{{$user.Role}}</td>
+          {{/*<td>{{if map_get $userWallets $user.Id "total"}}{{map_get $userWallets $user.Id "total"}}{{else}}&#45;{{end}}</td>*/}}
+          {{/*<td>*/}}
+              {{/*{{if map_get $userWallets $user.Id "balance"}}*/}}
+                {{/*{{$balance:=(map_get $userWallets $user.Id "balance")}}*/}}
+                {{/*{{div100 $balance | printf "%.2f"}}&nbsp;UAH*/}}
+              {{/*{{else}}&#45;*/}}
+              {{/*{{end}}*/}}
+          {{/*</td>*/}}
+          {{/*<td>{{$user.Token}}</td>*/}}
+          {{/*<td>{{$user.Token2F}}</td>*/}}
+          {{/*<td>{{$user.LastLoggedAt}}</td>*/}}
+          <td>{{$user.CreatedAt}}</td>
+          {{/*<td>{{$user.UpdatedAt}}</td>*/}}
+          {{/*<td>*/}}
+              {{/*<button type="button"*/}}
+                      {{/*class="btn-block-user btn {{if $user.Status}}btn-danger{{else}}btn-success{{end}}"*/}}
+                      {{/*data-status="{{$user.Status}}"*/}}
+                      {{/*data-id="{{$user.Id}}">{{if $user.Status}}Block{{else}}Unblock{{end}}</button>*/}}
+          {{/*</td>*/}}
+          <!--<td><a href="user/{{$user.Id}}/wallets">Wallets</a></td>-->
+      </tr>
+      {{end}}
+    </table>
+  </div>
+</div>
+</div>
+
+
+{{end}}
+<script>
+  $(document).ready( function () {
+    $('#usersTable').DataTable();
+    $('tbody tr[data-href]').addClass('clickable');
+  } );
+  $('tbody tr[data-href]').click( function() {
+    window.location = $(this).attr('data-href');
+  }).find('a').hover( function() {
+    $(this).parents('tr').unbind('click');
+  }, function() {
+    $(this).parents('tr').click( function() {
+      window.location = $(this).attr('data-href');
+    });
+  });
+</script>

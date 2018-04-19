@@ -1,0 +1,53 @@
+{{ template "layouts/admin.tpl" . }}
+
+{{ define "layout-content" }}
+<div class="panel-group">
+  <div class="panel panel-default" style="background-color: inherit">
+    <div class="panel-heading">
+      <h4>Servers</h4>
+    </div>
+    <div class="panel-body">
+      <table class="table" id="serversTable" cellspacing="0" width="100%">
+        <thead>
+        <tr style="background-color: inherit">
+          <th>Id</th>
+          <th>UserId</th>
+          <th>Name</th>
+          <th>Url</th>
+          <th>Role</th>
+          <th>Created At</th>
+        </tr>
+        </thead>
+
+      {{range $key, $server := .records}}
+        <tr data-href="/admin/server/{{$server.Id}}" style="background-color: inherit">
+          <td>{{$server.Id}}</td>
+          <td>{{$server.User.Id}}</td>
+          <td>{{$server.Name}}</td>
+          <td>{{$server.Url}}</td>
+          <td>{{$server.Role}}</td>
+          <td>{{$server.CreatedAt}}</td>
+        </tr>
+      {{end}}
+      </table>
+    </div>
+  </div>
+</div>
+
+
+{{end}}
+<script>
+  $(document).ready( function () {
+    $('#serversTable').DataTable();
+    $('tbody tr[data-href]').addClass('clickable');
+  } );
+  $('tbody tr[data-href]').click( function() {
+    window.location = $(this).attr('data-href');
+  }).find('a').hover( function() {
+    $(this).parents('tr').unbind('click');
+  }, function() {
+    $(this).parents('tr').click( function() {
+      window.location = $(this).attr('data-href');
+    });
+  });
+</script>
