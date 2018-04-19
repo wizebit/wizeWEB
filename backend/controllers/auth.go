@@ -230,7 +230,7 @@ func (a *AuthController) AdminSignIn() {
 	//	decode Private Key
 
 	csk, err := services.GetAESDecode(u.PrivateKey, services.GetMD5Hash(adm.AesKey))
-	beego.Warn(csk)
+
 	if err != nil {
 		beego.Error(err)
 		a.Data["errorMessage2"] = err.Error()
@@ -249,15 +249,18 @@ func (a *AuthController) AdminSignIn() {
 
 	if u.Role == 0 {
 		v := a.GetSession(sessionName)
+		beego.Info(v)
 		if v == nil {
 			a.SetSession(sessionName, u.PublicKey)
 		}
+		beego.Warn(a.GetSession(sessionName))
 		a.Redirect("/admin", 302)
 	}
 
 	a.Data["errorMessage"] = "Unauthorised access to this resource"
 	a.TplName = "auth/index.tpl"
 }
+
 func (a *AuthController) AdminSignOut() {
 	a.DelSession(sessionName)
 	a.Redirect("/auth/admin", 302)
@@ -266,7 +269,7 @@ func (a *AuthController) AdminSignOut() {
 //	customize filters for fine grain authorization
 var FilterUser = func(ctx *context.Context) {
 	//	Unauthorised requests
-	if strings.HasPrefix(ctx.Input.URL(), "/hello") || strings.HasPrefix(ctx.Input.URL(), "/auth") || strings.HasPrefix(ctx.Input.URL(), "/storage") {
+	if strings.HasPrefix(ctx.Input.URL(), "/auth") || strings.HasPrefix(ctx.Input.URL(), "/storage") || strings.HasPrefix(ctx.Input.URL(), "/hello") {
 		return
 	}
 
@@ -286,8 +289,8 @@ var FilterUser = func(ctx *context.Context) {
 	}
 
 	if strings.HasPrefix(ctx.Input.URL(), "/admin") {
-		_, ok := ctx.Input.Session(sessionName).(string)
-
+		a, ok := ctx.Input.Session(sessionName).(string)
+		beego.Error(a)
 		if ok {
 			var u models.Users
 			o := orm.NewOrm()
