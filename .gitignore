@@ -4,3 +4,4 @@
 ./backend/storage/*
 ./backend/static
 ./backend/backend
+backend/conf/db.conf
