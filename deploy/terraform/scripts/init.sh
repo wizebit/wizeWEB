@@ -3,7 +3,7 @@
 sudo apt-get -y update
 sudo apt-get install wget zip unzip -y
 sudo apt-get install gcc g++ -y
-#Install python for Ansible #FIXME: delete^ when not use ansible
+#Install python for Ansible
 test -e /usr/bin/python || (sudo apt -qqy update && sudo apt install -qqy python-minimal python-setuptools)
 #Install golang compiler
 cd ~/

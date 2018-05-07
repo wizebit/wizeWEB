@@ -1,0 +1,11 @@
+- name: Remove app directories
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /home/ubuntu/go/src/wizeblock
+    - /home/ubuntu/go/src/bitbucket.org/udt/wizefs
+    - /home/ubuntu/go/src/wizeweb
+
+- name: Remove containers
+  shell: docker rm -f $(docker ps -aq) >/dev/null 2>&1 || true

@@ -2,7 +2,10 @@
 [web]
 ubuntu@35.196.180.6
 
-[fs]
+[master]
+ubuntu@35.196.180.6
+
+[slave]
 ubuntu@35.190.150.237
 ubuntu@35.196.135.146
 
