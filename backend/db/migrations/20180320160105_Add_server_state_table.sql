@@ -15,18 +15,18 @@ CREATE TABLE server_state (
 );
 
 INSERT INTO server_state (Server_id, Ip, Latency, Free_storage, Uptime, Created_at) VALUES
-    ('1','127.0.0.1','100','100','100',NOW()),
-    ('2','127.0.0.1','100','100','100',NOW()),
-    ('3','127.0.0.1','100','100','100',NOW()),
-    ('4','127.0.0.1','100','100','100',NOW()),
-    ('5','127.0.0.1','100','100','100',NOW()),
-    ('6','127.0.0.1','100','100','100',NOW()),
-    ('7','127.0.0.1','100','100','100',NOW()),
-    ('8','127.0.0.1','100','100','100',NOW()),
+    ('1','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
+    ('2','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
+    ('3','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
+    ('4','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
+    ('5','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
+    ('6','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
+    ('7','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
+    ('8','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
     ('4','127.0.0.1','100','100','10',NOW()),
     ('5','127.0.0.1','100','100','1000',NOW());
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back
 
-DROP TABLE server_state;
+DROP TABLE server_state CASCADE;
