@@ -42,9 +42,10 @@ resource "google_compute_http_health_check" "http" {
 resource "google_compute_instance" "master" {
   count = 1
   name = "wizebit-master-${count.index}"
-  machine_type = "g1-small"
+  //machine_type = "g1-small"
+  machine_type = "f1-micro"
   zone = "${var.region_zone}"
-  tags = ["www-node"]
+  tags = ["master"]
   allow_stopping_for_update = true
 
   boot_disk {
@@ -122,6 +123,7 @@ resource "google_compute_instance" "www" {
   count = 1
   name = "wizebit-web-${count.index}"
   machine_type = "g1-small"
+//  machine_type = "f1-micro"
   zone = "${var.region_zone}"
   tags = ["www-node"]
   allow_stopping_for_update = true
@@ -201,7 +203,7 @@ SCRIPT
 
 
 resource "google_compute_instance" "slave" {
-  count = 2
+  count = "${var.number_of_servers}"
   name = "wize-slave-${count.index}"
   machine_type = "f1-micro"
   zone = "${var.region_zone}"
@@ -271,18 +273,37 @@ resource "google_compute_firewall" "www" {
 
 #########################################
 
-//resource "google_dns_record_set" "www" {
-//  name = "master.${google_dns_managed_zone.wize.dns_name}"
-//  type = "A"
-//  ttl  = 300
-//
-//  managed_zone = "${google_dns_managed_zone.wize.name}"
-//
-//  rrdatas = ["${google_compute_instance.www.network_interface.0.access_config.0.assigned_nat_ip}"]
-//}
-//
-//resource "google_dns_managed_zone" "wize" {
-//  name     = "wizebit"
-//  dns_name = "wizeprotocol.com."
-//}
+resource "google_dns_record_set" "www" {
+  name = "${google_dns_managed_zone.wize.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.wize.name}"
+
+  rrdatas = ["${google_compute_instance.www.network_interface.0.access_config.0.assigned_nat_ip}"]
+}
+resource "google_dns_record_set" "master" {
+  name = "master.${google_dns_managed_zone.wize.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.wize.name}"
+
+  rrdatas = ["${google_compute_instance.master.network_interface.0.access_config.0.assigned_nat_ip}"]
+}
+resource "google_dns_record_set" "slave" {
+  name = "slave0.${google_dns_managed_zone.wize.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.wize.name}"
+
+  rrdatas = ["${google_compute_instance.slave.0.network_interface.0.access_config.0.assigned_nat_ip}"]
+  }
+
+
+resource "google_dns_managed_zone" "wize" {
+  name     = "wize"
+  dns_name = "wizeprotocol.com."
+}
 
