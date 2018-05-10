@@ -14,7 +14,7 @@
                             {{.errorMessage}}
                         </div>
                     {{end}}
-                    <input name="aes_key" type="text" class="form-control" placeholder="Enter password"
+                    <input name="aes_key" type="password" class="form-control" placeholder="Enter password"
                            maxlength="32" size="32">
                     {{if .errorMessage2}}
                         <div class="invalid-feedback">
