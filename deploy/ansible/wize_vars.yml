@@ -8,3 +8,5 @@ app_user: ubuntu
 dbname: wize
 dbuser: wize
 dbpass: wize_user_pass
+
+docker_compose_dir: /home/ubuntu/go/src/wizeblock

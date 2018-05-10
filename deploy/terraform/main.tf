@@ -271,6 +271,19 @@ resource "google_compute_firewall" "www" {
   target_tags = ["www-node"]
 }
 
+resource "google_compute_firewall" "master" {
+  name = "wize-master-firewall"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports = ["3000", "4000"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags = ["master"]
+}
+
 #########################################
 
 resource "google_dns_record_set" "www" {

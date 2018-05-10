@@ -1,7 +1,7 @@
 ######################
 #Clean section
 ######################
-- hosts: web
+- hosts: master
   vars_files:
     - wize_vars.yml
   remote_user: "{{ app_user }}"
@@ -10,13 +10,13 @@
   become: true
 
   tasks:
-  # Clean installed
-    - import_tasks: books/clean.yml
+#  # Clean installed
+#    - import_tasks: books/clean.yml
 
 # =====================
 # WEB SERVER SECTION
 # =====================
-- hosts: web
+- hosts: master
   vars_files: 
     - wize_vars.yml
   remote_user: "{{ app_user }}"
@@ -25,44 +25,17 @@
   become: true
 
   tasks:
-# Install Nginx
-    - import_tasks: books/nginx.yml
+## Install Nginx
+#    - import_tasks: books/nginx.yml
 
 # INSTALL NODEJS, NPM, GIT
     - import_tasks: books/nodejs.yml
     - import_tasks: books/git.yml
 
 # INSTALL DOCKER CE
-#    - import_tasks: books/docker.yml
+    - import_tasks: books/docker.yml
 
-# ================
-# DATABASE SECTION
-# ================
-
-# Install PostgreSQL
-    - import_tasks: books/postgres.yml
-
-# CREATING POSTGRESQL DATABASE, USERS
-
-    - name: Create wize database
-      become_user: postgres
-      become: true
-      postgresql_db: name={{ item }} encoding='UTF-8' lc_collate='en_US.UTF-8' lc_ctype='en_US.UTF-8' state=present
-      with_items:
-        - "{{ dbname }}"
-
-    - name: Add database user
-      become_user: postgres
-      become: true
-      postgresql_user: db={{ dbname }} name={{ dbuser }} password={{ dbpass }} encrypted=yes priv=ALL state=present
-
-#    - name: Ensure that users does not have unnecessary privilege
-#      postgresql_user: name={{ item }} role_attr_flags=NOSUPERUSER,NOCREATEDB state=present
-#      with_items:
-#        - "{{ dbuser }}"
-#        - "{{ adminuser }}"
-
-- hosts: web
+- hosts: master
   vars_files:
     - wize_vars.yml
   remote_user: "{{ app_user }}"
@@ -79,85 +52,65 @@
         group: "{{ app_user }}"
         mode: 0755
       with_items:
-#        - ~/go/src/wizeblock
-#        - ~/go/src/bitbucket.org/udt/wizefs
-        - ~/go/src/wizeweb
+        - ~/go/src/wizeblock
+        - ~/go/src/bitbucket.org/udt/wizefs
+#        - ~/go/src/wizeweb
 
 # CLONING REPOSITORIES
-#    - name: Clone wizeBlock repository
-#      git:
-#        repo: git@bitbucket.org:udt/wizeblock.git
-#        key_file: ~/.ssh/wize_web
-#        dest: ~/go/src/wizeblock
-#        force: true
-#        accept_hostkey: yes
-#        version: prod
-#
-#    - name: Clone wizeFS repository
-#      git:
-#        repo: git@bitbucket.org:udt/wizefs.git
-#        key_file: ~/.ssh/wize_web
-#        dest: ~/go/src/bitbucket.org/udt/wizefs
-#        force: true
-#        accept_hostkey: yes
-#        version: prod
-
-    - name: Clone wizeWeb repository
+    - name: Clone wizeBlock repository
       git:
-        repo: git@bitbucket.org:udt/wizeweb.git
+        repo: git@bitbucket.org:udt/wizeblock.git
         key_file: ~/.ssh/wize_web
-        dest: ~/go/src/wizeweb
+        dest: ~/go/src/wizeblock
         force: true
         accept_hostkey: yes
-        version: master
+        version: prod
 
-    - name: Copy  DB config
+    - name: Clone wizeFS repository
+      git:
+        repo: git@bitbucket.org:udt/wizefs.git
+        key_file: ~/.ssh/wize_web
+        dest: ~/go/src/bitbucket.org/udt/wizefs
+        force: true
+        accept_hostkey: yes
+        version: prod
+
+
+- hosts: master
+  vars_files:
+    - wize_vars.yml
+  remote_user: "{{ app_user }}"
+  become_user: root
+  become_method: sudo
+  become: true
+
+  tasks:
+    - name: Creates app directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "root"
+        group: "root"
+        mode: 0755
+      with_items:
+        - /root/.local
+        - /root/.local/share
+        - /root/.local/share/wize
+        - /root/.local/share/wize/fs
+
+    - name: Copy  node config
       copy:
-        src: configs/db.conf
-        dest: ~/go/src/wizeweb/backend/conf/db.conf
+        src: configs/.env.wizeblock
+        dest: /home/ubuntu/go/src/wizeblock/.env
         owner: ubuntu
         group: ubuntu
         mode: 0644
 
-    - name: Copy  DB migrate config
-      copy:
-        src: configs/dbconf.yml
-        dest: ~/go/src/wizeweb/backend/db/dbconf.yml
-        owner: ubuntu
-        group: ubuntu
-        mode: 0644
+    - name: run the service defined in wizeblock docker-compose.yml
+      command: /usr/local/bin/docker-compose up -d --build
+      args:
+        chdir: "{{ docker_compose_dir }}"
 
-
-    - name: build wizeweb backend
-      shell: cd ~/go/src/wizeweb/backend; /usr/local/go/bin/go get ./...;/usr/local/go/bin/go build; ./backend &
-
-    - name: build wizeweb frontend
-      shell: cd ~/go/src/wizeweb/frontend; npm install; npm run build
-
-    - name: install goose
-      shell: /usr/local/go/bin/go get bitbucket.org/liamstask/goose/cmd/goose
-
-#- hosts: web
-#  vars_files:
-#    - wize_vars.yml
-#  remote_user: "{{ app_user }}"
-#  become_user: root
-#  become_method: sudo
-#  become: true
-#
-#  tasks:
-#    - name: Creates app directories
-#      file:
-#        path: "{{ item }}"
-#        state: directory
-#        owner: "root"
-#        group: "root"
-#        mode: 0755
-#      with_items:
-#        - /root/.local
-#        - /root/.local/share
-#        - /root/.local/share/wize
-#        - /root/.local/share/wize/fs
 
 ## =====================
 ## Storage SERVER SECTION

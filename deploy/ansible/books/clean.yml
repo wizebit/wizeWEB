@@ -8,4 +8,5 @@
     - /home/ubuntu/go/src/wizeweb
 
 - name: Remove containers
-  shell: docker rm -f $(docker ps -aq) >/dev/null 2>&1 || true
+  shell: docker rm -f $(docker ps -aq) >/dev/null 2>&1 || docker rmi $(docker images -q) >/dev/null 2>&1 || true
+
