@@ -1,7 +1,7 @@
 ######################
 #Clean section
 ######################
-#- hosts: master
+#- hosts: slave
 #  vars_files:
 #    - wize_vars.yml
 #  remote_user: "{{ app_user }}"
@@ -18,7 +18,7 @@
 # =====================
 # WEB SERVER SECTION
 # =====================
-- hosts: master
+- hosts: slave
   vars_files: 
     - wize_vars.yml
   remote_user: "{{ app_user }}"
@@ -27,6 +27,7 @@
   become: true
 
   tasks:
+
 ## Install Nginx
 #    - import_tasks: books/nginx.yml
 
@@ -37,7 +38,7 @@
 # INSTALL DOCKER CE
     - import_tasks: books/docker.yml
 
-- hosts: master
+- hosts: slave
   vars_files:
     - wize_vars.yml
   remote_user: "{{ app_user }}"
@@ -77,13 +78,14 @@
         accept_hostkey: yes
         version: prod
 
-- hosts: master
+- hosts: slave
   vars_files:
     - wize_vars.yml
   remote_user: "{{ app_user }}"
   become_user: root
   become_method: sudo
   become: true
+
 
   tasks:
     - name: Creates app directories
@@ -99,22 +101,26 @@
         - /root/.local/share/wize
         - /root/.local/share/wize/fs
 
-    - name: Copy  bc node config
-      copy:
-        src: configs/.env.master
-        dest: "{{ item }}"
-        owner: ubuntu
-        group: ubuntu
-        mode: 0644
-      with_items:
-        - /home/ubuntu/go/src/wizeblock/.env
-        - /home/ubuntu/go/src/bitbucket.org/udt/wizefs/.env
+#    - name: Copy  bc node config
+#      copy:
+#        src: configs/.env.slave
+#        dest: "{{ item }}"
+#        owner: ubuntu
+#        group: ubuntu
+#        mode: 0644
+#      with_items:
+#        - /home/ubuntu/go/src/wizeblock/.env
+#        - /home/ubuntu/go/src/bitbucket.org/udt/wizefs/.env
 
+    - name: Setup .env config
+      template:
+        src: configs/.env.slave
+        dest: /home/ubuntu/go/src/bitbucket.org/udt/wizefs/.env
 
-    - name: run the service defined in wizeblock docker-compose.yml
-      command: /usr/local/bin/docker-compose up -d --build
-      args:
-        chdir: "{{ docker_compose_dir }}"
+#    - name: run the service defined in wizeblock docker-compose.yml
+#      command: /usr/local/bin/docker-compose up -d --build
+#      args:
+#        chdir: "{{ docker_compose_dir }}"
 
     - name: run the service defined in wizefs docker-compose.yml
       command: /usr/local/bin/docker-compose up -d --build

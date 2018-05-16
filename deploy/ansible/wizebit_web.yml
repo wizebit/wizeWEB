@@ -12,6 +12,8 @@
   tasks:
   # Clean installed
     - import_tasks: books/clean.yml
+#  # install monitoring
+#    - import_tasks: books/google_monitor.yml
 
 # =====================
 # WEB SERVER SECTION

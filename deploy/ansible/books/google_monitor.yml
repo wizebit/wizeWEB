@@ -1,0 +1,3 @@
+- name: Install monitoring
+  become: true
+  apt: pkg=stackdriver-agent update_cache=yes

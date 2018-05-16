@@ -10,20 +10,25 @@
 - name: Install Docker CE
   apt: name=docker-ce state=latest update_cache=yes
 
-- name: Install Docker Compose
-  shell: curl -L https://github.com/docker/compose/releases/download/1.20.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
-  args:
-    warn: false
+#- name: Install Docker Compose
+#  shell: curl -L https://github.com/docker/compose/releases/download/1.20.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+#  args:
+#    warn: false
 
 - name: Install PIP
   apt: name=python-pip state=latest update_cache=yes
 
-- name: install docker-py
-  pip:
-    name: docker-py
-    state: present
+#- name: install docker-py
+#  pip:
+#    name: docker-py
+#    state: present
 
 - name: install docker-compose
   pip:
     name: docker-compose
+    state: present
+
+- name: install docker
+  pip:
+    name: docker
     state: present

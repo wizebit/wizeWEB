@@ -277,11 +277,11 @@ resource "google_compute_firewall" "master" {
 
   allow {
     protocol = "tcp"
-    ports = ["3000", "4000"]
+    ports = ["3000", "4000", "11000", "12000", "13000"]
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags = ["master"]
+  target_tags = ["master", "slave"]
 }
 
 #########################################
