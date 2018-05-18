@@ -1,17 +1,17 @@
 ######################
 #Clean section
 ######################
-#- hosts: slave
-#  vars_files:
-#    - wize_vars.yml
-#  remote_user: "{{ app_user }}"
-#  become_user: root
-#  become_method: sudo
-#  become: true
-#
-#  tasks:
-#  # Clean installed
-#    - import_tasks: books/clean.yml
+- hosts: slave
+  vars_files:
+    - wize_vars.yml
+  remote_user: "{{ app_user }}"
+  become_user: root
+  become_method: sudo
+  become: true
+
+  tasks:
+  # Clean installed
+    - import_tasks: books/clean.yml
 #  # install monitoring
 #    - import_tasks: books/google_monitor.yml
 
@@ -123,7 +123,7 @@
 #        chdir: "{{ docker_compose_dir }}"
 
     - name: run the service defined in wizefs docker-compose.yml
-      command: /usr/local/bin/docker-compose up -d --build
+      command: /usr/local/bin/docker-compose -f docker-compose.prod.yml up -d --build
       args:
         chdir: "{{ docker_compose_fs }}"
 
