@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/astaxie/beego/orm"
 	"time"
 )
 
@@ -45,6 +46,12 @@ type Servers struct {
 	UpdatedAt time.Time `orm:"column(updated_at);type(timestamp);auto_now"`
 }
 
+func GetAllServers() (servers []*Servers, err error) {
+	o := orm.NewOrm()
+	_, err = o.QueryTable("servers").RelatedSel().All(&servers)
+	return
+}
+
 type ServerState struct {
 	Id          int      `orm:"pk;column(id);auto"`
 	ServerId    *Servers `orm:"rel(one)"`
@@ -53,8 +60,8 @@ type ServerState struct {
 	Latency     int      // in ms by ping?
 	FreeStorage int      // in MB
 	Uptime      int      // in sec from server goroutine
-	TypeActive  string   // out/in for different type of monitoring -active/passive
-	Rate        int      // calculated rate of server in moment
+	//TypeActive  string   // out/in for different type of monitoring -active/passive
+	Rate int // calculated rate of server in moment
 	// if status = false {Rate = 0}
 	// else Rate = 0,2*FreeStorage/max.FreeStorage + 0,3*Uptime/max.Uptime +
 	// + 0,1*min.Latency/Latency + TypeActive*0,4
