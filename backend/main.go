@@ -152,7 +152,7 @@ func readFile(filename string) (content []byte, err error) {
 
 func main() {
 	logs.NewLogger()
-	logs.SetLogger(logs.AdapterMultiFile, `{"filename":"wizebit.log", "daily": "true"}`)
+	logs.SetLogger(logs.AdapterMultiFile, `{"filename":"wizebit.log", "daily":true}`)
 	//	public storage
 	beego.SetStaticPath("/storage", "storage")
 	//	session initiation

@@ -54,18 +54,36 @@ func GetAllServers() (servers []*Servers, err error) {
 
 type ServerState struct {
 	Id          int      `orm:"pk;column(id);auto"`
-	ServerId    *Servers `orm:"rel(one)"`
-	Ip          string   // IP of server, can be different, must monitoring this
+	ServerId    *Servers `orm:"rel(fk);column(server_id)"`
 	Status      bool     // up/down - true/false
-	Latency     int      // in ms by ping?
-	FreeStorage int      // in MB
-	Uptime      int      // in sec from server goroutine
-	//TypeActive  string   // out/in for different type of monitoring -active/passive
-	Rate int // calculated rate of server in moment
+	Latency     int64    // in ns by calculated duration of operation?
+	FreeStorage int64    // in MB
+	Uptime      int64    // in sec from server goroutine
+	Rate        int      // calculated rate of server in moment
 	// if status = false {Rate = 0}
-	// else Rate = 0,2*FreeStorage/max.FreeStorage + 0,3*Uptime/max.Uptime +
-	// + 0,1*min.Latency/Latency + TypeActive*0,4
+	// else rate = 0.3*float64(state.FreeStorage)/float64(maxstorage) + 0.5*float64(state.Uptime)/float64(maxUptime)
+	// + 0.2*float64(minLatency)/float64(state.Latency)
 	CreatedAt time.Time `orm:"column(created_at);type(timestamp);auto_now_add"`
+}
+
+func GetLastState(server *Servers) (v ServerState, err error) {
+	o := orm.NewOrm()
+	v = ServerState{ServerId: server}
+	err = o.QueryTable("server_state").Filter("server_id", server.Id).OrderBy("-id").One(&v)
+	return
+}
+func AddServerState(s *ServerState) (id int64, err error) {
+	o := orm.NewOrm()
+	id, err = o.Insert(s)
+	return
+}
+func UpdateServerState(s *ServerState) (err error) {
+	o := orm.NewOrm()
+	v := ServerState{Id: s.Id}
+	if err = o.Read(&v); err == nil {
+		_, err = o.Update(s)
+	}
+	return
 }
 
 type ServerList struct {
@@ -74,10 +92,10 @@ type ServerList struct {
 	SId         int
 	Ip          string
 	Status      bool
-	Latency     int
-	FreeStorage int
-	Uptime      int
-	Rate        int
+	Latency     int64
+	FreeStorage int64
+	Uptime      int64
+	Rate        float64
 	CreatedAt   time.Time
 }
 
