@@ -220,7 +220,7 @@ func getServerList(t string) ([]string, error) {
 	o := orm.NewOrm()
 	o.Using("default")
 	var list []string
-	num, err := o.Raw("SELECT url FROM serverListView WHERE role=?", t).QueryRows(&list)
+	num, err := o.Raw("SELECT url FROM serverListView WHERE role=? AND status=true", t).QueryRows(&list)
 	if err == nil && num > 0 { // if others error
 		return list, err
 	} else {

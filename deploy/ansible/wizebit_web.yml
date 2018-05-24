@@ -112,7 +112,7 @@
         dest: ~/go/src/wizeweb
         force: true
         accept_hostkey: yes
-        version: master
+        version: "{{ deploy_release }}"
 
     - name: Copy  DB config
       copy:

@@ -67,7 +67,7 @@
         dest: ~/go/src/wizeblock
         force: true
         accept_hostkey: yes
-        version: prod
+        version: "{{ deploy_release }}"
 
     - name: Clone wizeFS repository
       git:
@@ -76,7 +76,7 @@
         dest: ~/go/src/bitbucket.org/udt/wizefs
         force: true
         accept_hostkey: yes
-        version: prod
+        version: "{{ deploy_release }}"
 
 - hosts: slave
   vars_files:
