@@ -1,4 +1,20 @@
----
+######################
+#Clean section
+######################
+- hosts: web
+  vars_files:
+    - wize_vars.yml
+  remote_user: "{{ app_user }}"
+  become_user: root
+  become_method: sudo
+  become: true
+
+  tasks:
+  # Clean installed
+    - import_tasks: books/clean.yml
+#  # install monitoring
+#    - import_tasks: books/google_monitor.yml
+
 # =====================
 # WEB SERVER SECTION
 # =====================
@@ -19,7 +35,7 @@
     - import_tasks: books/git.yml
 
 # INSTALL DOCKER CE
-    - import_tasks: books/docker.yml
+#    - import_tasks: books/docker.yml
 
 # ================
 # DATABASE SECTION
@@ -42,11 +58,12 @@
       become: true
       postgresql_user: db={{ dbname }} name={{ dbuser }} password={{ dbpass }} encrypted=yes priv=ALL state=present
 
-#    - name: Ensure that users does not have unnecessary privilege
-#      postgresql_user: name={{ item }} role_attr_flags=NOSUPERUSER,NOCREATEDB state=present
-#      with_items:
-#        - "{{ dbuser }}"
-#        - "{{ adminuser }}"
+    - name: Ensure that users does not have unnecessary privilege
+      become_user: postgres
+      become: true
+      postgresql_user: name={{ item }} role_attr_flags=NOSUPERUSER,NOCREATEDB state=present
+      with_items:
+        - "{{ dbuser }}"
 
 - hosts: web
   vars_files:
@@ -65,28 +82,28 @@
         group: "{{ app_user }}"
         mode: 0755
       with_items:
-        - ~/go/src/wizeblock
-        - ~/go/src/bitbucket.org/udt/wizefs
+#        - ~/go/src/wizeblock
+#        - ~/go/src/bitbucket.org/udt/wizefs
         - ~/go/src/wizeweb
 
 # CLONING REPOSITORIES
-    - name: Clone wizeBlock repository
-      git:
-        repo: git@bitbucket.org:udt/wizeblock.git
-        key_file: ~/.ssh/wize_web
-        dest: ~/go/src/wizeblock
-        force: true
-        accept_hostkey: yes
-        version: prod
-
-    - name: Clone wizeFS repository
-      git:
-        repo: git@bitbucket.org:udt/wizefs.git
-        key_file: ~/.ssh/wize_web
-        dest: ~/go/src/bitbucket.org/udt/wizefs
-        force: true
-        accept_hostkey: yes
-        version: prod
+#    - name: Clone wizeBlock repository
+#      git:
+#        repo: git@bitbucket.org:udt/wizeblock.git
+#        key_file: ~/.ssh/wize_web
+#        dest: ~/go/src/wizeblock
+#        force: true
+#        accept_hostkey: yes
+#        version: prod
+#
+#    - name: Clone wizeFS repository
+#      git:
+#        repo: git@bitbucket.org:udt/wizefs.git
+#        key_file: ~/.ssh/wize_web
+#        dest: ~/go/src/bitbucket.org/udt/wizefs
+#        force: true
+#        accept_hostkey: yes
+#        version: prod
 
     - name: Clone wizeWeb repository
       git:
@@ -115,7 +132,10 @@
 
 
     - name: build wizeweb backend
-      shell: cd ~/go/src/wizeweb/backend; /usr/local/go/bin/go get ./...;/usr/local/go/bin/go build; ./backend &
+      shell: cd ~/go/src/wizeweb/backend; /usr/local/go/bin/go get ./...;/usr/local/go/bin/go build
+
+    - name: build wizeweb admin frontend
+      shell: cd ~/go/src/wizeweb/backend; npm install; npm run dev
 
     - name: build wizeweb frontend
       shell: cd ~/go/src/wizeweb/frontend; npm install; npm run build
@@ -123,10 +143,7 @@
     - name: install goose
       shell: /usr/local/go/bin/go get bitbucket.org/liamstask/goose/cmd/goose
 
-# =====================
-# Storage SERVER SECTION
-# =====================
-- hosts: fs
+- hosts: web
   vars_files:
     - wize_vars.yml
   remote_user: "{{ app_user }}"
@@ -135,70 +152,112 @@
   become: true
 
   tasks:
+# Install Supervisor
+    - import_tasks: books/supervisor.yml
 
-# INSTALL NODEJS, NPM, GIT
-    - import_tasks: books/nodejs.yml
-    - import_tasks: books/git.yml
+#- hosts: web
+#  vars_files:
+#    - wize_vars.yml
+#  remote_user: "{{ app_user }}"
+#  become_user: root
+#  become_method: sudo
+#  become: true
+#
+#  tasks:
+#    - name: Creates app directories
+#      file:
+#        path: "{{ item }}"
+#        state: directory
+#        owner: "root"
+#        group: "root"
+#        mode: 0755
+#      with_items:
+#        - /root/.local
+#        - /root/.local/share
+#        - /root/.local/share/wize
+#        - /root/.local/share/wize/fs
 
-# PREPARE SSH KEY FOR REPOSITORY
-    - import_tasks: books/bitbucket.yml
-
-# CREATE DIRECTORIES FOR APPLICATION
-    - name: Creates app directories
-      file:
-        path: "{{ item }}"
-        state: directory
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
-        mode: 0755
-      with_items:
-        - ~/go/src/wizeblock
-        - ~/go/src/bitbucket.org/udt/wizefs
-
-# CLONING REPOSITORIES
-    - name: Clone wizeBlock repository
-      git:
-        repo: git@bitbucket.org:udt/wizeblock.git
-        key_file: ~/.ssh/wize_web
-        dest: ~/go/src/wizeblock
-        force: true
-        accept_hostkey: yes
-        version: prod
-
-    - name: Clone wizeFS repository
-      git:
-        repo: git@bitbucket.org:udt/wizefs.git
-        key_file: ~/.ssh/wize_web
-        dest: ~/go/src/bitbucket.org/udt/wizefs
-        force: true
-        accept_hostkey: yes
-        version: prod
-
-    - name: Clone wizeWeb repository
-      git:
-        repo: git@bitbucket.org:udt/wizeweb.git
-        key_file: ~/.ssh/wize_web
-        dest: ~/go/src/wizeweb
-        force: true
-        accept_hostkey: yes
-        version: master
-
-    - name: Creates app directories
-      file:
-        path: "{{ item }}"
-        state: directory
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
-        mode: 0755
-      with_items:
-        - ~/wizeblock
-        - ~/wizefs
-
-    - name: Clone wizeFS repository
-      git:
-        repo: git@bitbucket.org:udt/wizefs.git
-        key_file: ~/.ssh/wize_web
-        dest: ~/wizefs
-        force: true
-        accept_hostkey: yes
-        version: master
+## =====================
+## Storage SERVER SECTION
+## =====================
+#- hosts: fs
+#  vars_files:
+#    - wize_vars.yml
+#  remote_user: "{{ app_user }}"
+#  become_user: root
+#  become_method: sudo
+#  become: true
+#
+#  tasks:
+#
+## INSTALL NODEJS, NPM, GIT
+#    - import_tasks: books/nodejs.yml
+#    - import_tasks: books/git.yml
+## INSTALL DOCKER CE
+#    - import_tasks: books/docker.yml
+#
+#- hosts: fs
+#  vars_files:
+#    - wize_vars.yml
+#  remote_user: "{{ app_user }}"
+#
+#  tasks:
+## PREPARE SSH KEY FOR REPOSITORY
+#    - import_tasks: books/bitbucket.yml
+#
+## CREATE DIRECTORIES FOR APPLICATION
+#    - name: Creates app directories
+#      file:
+#        path: "{{ item }}"
+#        state: directory
+#        owner: "{{ app_user }}"
+#        group: "{{ app_user }}"
+#        mode: 0755
+#      with_items:
+#        - ~/go/src/wizeblock
+#        - ~/go/src/bitbucket.org/udt/wizefs
+#
+#
+## CLONING REPOSITORIES
+#    - name: Clone wizeBlock repository
+#      git:
+#        repo: git@bitbucket.org:udt/wizeblock.git
+#        key_file: ~/.ssh/wize_web
+#        dest: ~/go/src/wizeblock
+#        force: true
+#        accept_hostkey: yes
+#        version: prod
+#
+#    - name: Clone wizeFS repository
+#      git:
+#        repo: git@bitbucket.org:udt/wizefs.git
+#        key_file: ~/.ssh/wize_web
+#        dest: ~/go/src/bitbucket.org/udt/wizefs
+#        force: true
+#        accept_hostkey: yes
+#        version: prod
+#
+#- hosts: fs
+#  vars_files:
+#    - wize_vars.yml
+#  remote_user: "{{ app_user }}"
+#  become_user: root
+#  become_method: sudo
+#  become: true
+#
+#  tasks:
+#    - name: Creates app directories
+#      file:
+#        path: "{{ item }}"
+#        state: directory
+#        owner: "root"
+#        group: "root"
+#        mode: 0755
+#      with_items:
+#        - /root/.local
+#        - /root/.local/share
+#        - /root/.local/share/wize
+#        - /root/.local/share/wize/fs
+#
+##    - name: start docker container
+##      shell: cd /home/ubuntu/go/src/bitbucket.org/udt/wizefs; bash start.sh

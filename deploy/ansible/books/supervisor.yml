@@ -1,0 +1,15 @@
+# Install supervisor
+- name: Install supervisor
+  apt: pkg=supervisor update_cache=yes
+
+- name: Upload supervisor rules
+  copy:
+    src: configs/supervisor.conf
+    dest: /etc/supervisor/conf.d
+    mode: 0644
+
+- name: Stop Supervisor
+  service: name=supervisor state=stopped
+
+- name: Start Supervisor
+  service: name=supervisor state=started

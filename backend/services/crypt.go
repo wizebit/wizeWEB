@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/md5"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
@@ -11,18 +12,26 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"crypto/md5"
 )
 
 const (
 	presalt  = "R00qFyRJY0Pvfqjk3Oq9K4FXFwkfDNHyZ05ufj0dYcUb2hF79woYXhESMQSj5lN9kiAi9SW33LmAvo"
 	postsalt = "BfpZXF2n3TEG7pe4EFe1GFttYxzv4CJUOpFHx08NEVWV6RpSn6KofmLA1JBrTZWJfAWbLoiaSDBc55fMx4ICS4pUSr9125xkH12Y"
+
 //	aesKey   = "bNCKcOvcKU5wLxPVhLcF5MtExncnpkhB"
 )
 
 func GetHash(data string) string {
 	h256 := sha256.New()
 	out := fmt.Sprintf("%s%s%s", presalt, data, postsalt)
+	io.WriteString(h256, out)
+
+	return fmt.Sprintf("%x", h256.Sum(nil))
+}
+
+func GetOnlyHash(data string) string {
+	h256 := sha256.New()
+	out := fmt.Sprintf("%s", data)
 	io.WriteString(h256, out)
 
 	return fmt.Sprintf("%x", h256.Sum(nil))

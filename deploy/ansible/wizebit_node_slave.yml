@@ -1,0 +1,132 @@
+######################
+#Clean section
+######################
+- hosts: slave
+  vars_files:
+    - wize_vars.yml
+  remote_user: "{{ app_user }}"
+  become_user: root
+  become_method: sudo
+  become: true
+
+  tasks:
+  # Clean installed
+    - import_tasks: books/clean.yml
+#  # install monitoring
+#    - import_tasks: books/google_monitor.yml
+
+# =====================
+# WEB SERVER SECTION
+# =====================
+- hosts: slave
+  vars_files: 
+    - wize_vars.yml
+  remote_user: "{{ app_user }}"
+  become_user: root
+  become_method: sudo
+  become: true
+
+  tasks:
+
+## Install Nginx
+#    - import_tasks: books/nginx.yml
+
+# INSTALL NODEJS, NPM, GIT
+#    - import_tasks: books/nodejs.yml
+    - import_tasks: books/git.yml
+
+# INSTALL DOCKER CE
+    - import_tasks: books/docker.yml
+
+- hosts: slave
+  vars_files:
+    - wize_vars.yml
+  remote_user: "{{ app_user }}"
+
+  tasks:
+# PREPARE SSH KEY FOR REPOSITORY
+    - import_tasks: books/bitbucket.yml
+# CREATE DIRECTORIES FOR APPLICATION
+    - name: Creates app directories
+      file: 
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: 0755
+      with_items:
+        - ~/go/src/wizeblock
+        - ~/go/src/bitbucket.org/udt/wizefs
+#        - ~/go/src/wizeweb
+
+# CLONING REPOSITORIES
+    - name: Clone wizeBlock repository
+      git:
+        repo: git@bitbucket.org:udt/wizeblock.git
+        key_file: ~/.ssh/wize_web
+        dest: ~/go/src/wizeblock
+        force: true
+        accept_hostkey: yes
+        version: prod
+
+    - name: Clone wizeFS repository
+      git:
+        repo: git@bitbucket.org:udt/wizefs.git
+        key_file: ~/.ssh/wize_web
+        dest: ~/go/src/bitbucket.org/udt/wizefs
+        force: true
+        accept_hostkey: yes
+        version: prod
+
+- hosts: slave
+  vars_files:
+    - wize_vars.yml
+  remote_user: "{{ app_user }}"
+  become_user: root
+  become_method: sudo
+  become: true
+
+
+  tasks:
+    - name: Creates app directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "root"
+        group: "root"
+        mode: 0755
+      with_items:
+        - /root/.local
+        - /root/.local/share
+        - /root/.local/share/wize
+        - /root/.local/share/wize/fs
+
+#    - name: Copy  bc node config
+#      copy:
+#        src: configs/.env.slave
+#        dest: "{{ item }}"
+#        owner: ubuntu
+#        group: ubuntu
+#        mode: 0644
+#      with_items:
+#        - /home/ubuntu/go/src/wizeblock/.env
+#        - /home/ubuntu/go/src/bitbucket.org/udt/wizefs/.env
+
+    - name: Setup .env config
+      template:
+        src: configs/.env.slave
+        dest: /home/ubuntu/go/src/bitbucket.org/udt/wizefs/.env
+
+#    - name: run the service defined in wizeblock docker-compose.yml
+#      command: /usr/local/bin/docker-compose up -d --build
+#      args:
+#        chdir: "{{ docker_compose_dir }}"
+
+    - name: run the service defined in wizefs docker-compose.yml
+      command: /usr/local/bin/docker-compose -f docker-compose.prod.yml up -d --build
+      args:
+        chdir: "{{ docker_compose_fs }}"
+
+
+##    - name: start docker container
+##      shell: cd /home/ubuntu/go/src/bitbucket.org/udt/wizefs; bash start.sh

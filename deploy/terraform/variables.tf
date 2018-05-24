@@ -13,3 +13,7 @@ variable "project_name" {
 variable "account_file_path" {
   description = "Path to the JSON file used to describe your account credentials"
 }
+
+variable "number_of_servers" {
+  default = "2"
+}

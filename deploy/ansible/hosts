@@ -1,8 +1,11 @@
 # Wizebit web server
 [web]
-ubuntu@35.196.180.6
+35.231.74.108 ansible_connection=ssh ansible_user=ubuntu
 
-[fs]
-ubuntu@35.190.150.237
-ubuntu@35.196.135.146
+[master]
+35.229.95.35  ansible_connection=ssh ansible_user=ubuntu
+
+[slave]
+35.196.180.6  public_ip=35.196.180.6  ansible_connection=ssh ansible_user=ubuntu
+35.190.150.237  public_ip=35.190.150.237 ansible_connection=ssh  ansible_user=ubuntu
 

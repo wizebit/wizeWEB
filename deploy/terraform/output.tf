@@ -1,5 +1,5 @@
 output "public_ip" {
-  value = "${google_compute_address.www.address}"
+  value = "${google_compute_instance.www.network_interface.0.access_config.0.assigned_nat_ip}"
 }
 
 output "slave_ips" {
@@ -7,5 +7,5 @@ output "slave_ips" {
 }
 
 output "master_ip" {
-  value = "${join(" ", google_compute_instance.www.*.network_interface.0.access_config.0.assigned_nat_ip)}"
+  value = "${join(" ", google_compute_instance.master.*.network_interface.0.access_config.0.assigned_nat_ip)}"
 }

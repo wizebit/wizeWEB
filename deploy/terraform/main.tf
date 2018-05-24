@@ -39,12 +39,13 @@ resource "google_compute_http_health_check" "http" {
 #########################################
 # MASTER server part of the www cluster
 #########################################
-resource "google_compute_instance" "www" {
+resource "google_compute_instance" "master" {
   count = 1
   name = "wizebit-master-${count.index}"
-  machine_type = "g1-small"
+  //machine_type = "g1-small"
+  machine_type = "f1-micro"
   zone = "${var.region_zone}"
-  tags = ["www-node"]
+  tags = ["master"]
   allow_stopping_for_update = true
 
   boot_disk {
@@ -115,13 +116,94 @@ SCRIPT
   }
 }
 
+########################################
+#MASTER server
+########################################
+resource "google_compute_instance" "www" {
+  count = 1
+  name = "wizebit-web-${count.index}"
+  machine_type = "g1-small"
+//  machine_type = "f1-micro"
+  zone = "${var.region_zone}"
+  tags = ["www-node"]
+  allow_stopping_for_update = true
+
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-1604-lts"
+    }
+  }
+  network_interface {
+    network = "default"
+    access_config {
+      # Ephemeral
+    }
+  }
+  service_account {
+    scopes = ["https://www.googleapis.com/auth/compute.readonly"]
+  }
+
+  metadata_startup_script = <<SCRIPT
+
+echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+SCRIPT
+
+  # Copies the key file for bitbucket
+  provisioner "file" {
+    source      = "ssh/wize_web"
+    destination = "~/wize_web"
+    connection {
+      user = "ubuntu"
+      private_key = "${file("~/.ssh/id_rsa")}"
+      agent = "false"
+    }
+  }
+
+  provisioner "file" {
+    source      = "configs"
+    destination = "/home/ubuntu"
+    connection {
+      user = "ubuntu"
+      private_key = "${file("~/.ssh/id_rsa")}"
+      agent = "false"
+      //      timeout = "30s"
+    }
+  }
+
+  //  provisioner "file" {
+  //    source      = "configs/db.conf"
+  //    destination = "/home/ubuntu/db.conf"
+  //    connection {
+  //      user = "ubuntu"
+  //      private_key = "${file("~/.ssh/id_rsa")}"
+  //      agent = "false"
+  //      //      timeout = "30s"
+  //    }
+  //  }
+
+  provisioner "remote-exec" {
+    script = "scripts/init.sh"
+    connection {
+      user = "ubuntu"
+      private_key = "${file("~/.ssh/id_rsa")}"
+      agent = "false"
+      //      timeout = "30s"
+    }
+  }
+  metadata {
+    sshKeys = "ubuntu:${file("~/.ssh/id_rsa.pub")}"
+  }
+}
+
+
 #########################################
 #SLAVE servers
 #########################################
 
 
 resource "google_compute_instance" "slave" {
-  count = 2
+  count = "${var.number_of_servers}"
   name = "wize-slave-${count.index}"
   machine_type = "f1-micro"
   zone = "${var.region_zone}"
@@ -189,10 +271,23 @@ resource "google_compute_firewall" "www" {
   target_tags = ["www-node"]
 }
 
+resource "google_compute_firewall" "master" {
+  name = "wize-master-firewall"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports = ["3000", "4000", "11000", "12000", "13000"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags = ["master", "slave"]
+}
+
 #########################################
 
 resource "google_dns_record_set" "www" {
-  name = "master.${google_dns_managed_zone.wize.dns_name}"
+  name = "${google_dns_managed_zone.wize.dns_name}"
   type = "A"
   ttl  = 300
 
@@ -200,9 +295,28 @@ resource "google_dns_record_set" "www" {
 
   rrdatas = ["${google_compute_instance.www.network_interface.0.access_config.0.assigned_nat_ip}"]
 }
+resource "google_dns_record_set" "master" {
+  name = "master.${google_dns_managed_zone.wize.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.wize.name}"
+
+  rrdatas = ["${google_compute_instance.master.network_interface.0.access_config.0.assigned_nat_ip}"]
+}
+resource "google_dns_record_set" "slave" {
+  name = "slave0.${google_dns_managed_zone.wize.dns_name}"
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.wize.name}"
+
+  rrdatas = ["${google_compute_instance.slave.0.network_interface.0.access_config.0.assigned_nat_ip}"]
+  }
+
 
 resource "google_dns_managed_zone" "wize" {
-  name     = "wizebit"
+  name     = "wize"
   dns_name = "wizeprotocol.com."
 }
 
