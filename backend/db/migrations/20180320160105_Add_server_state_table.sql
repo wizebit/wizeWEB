@@ -4,27 +4,23 @@
 CREATE TABLE server_state (
   id SERIAL PRIMARY KEY,
   Server_id int,
-  Ip text NOT NULL,
   Status boolean DEFAULT false,
   Latency int,
   Free_storage int,
   Uptime int,
-  Type_active boolean DEFAULT false,
   Rate int DEFAULT 0,
-  Created_at TIMESTAMP
+  Created_at TIMESTAMP,
+  FOREIGN KEY (Server_id) REFERENCES Servers(id)
 );
 
-INSERT INTO server_state (Server_id, Ip, Latency, Free_storage, Uptime, Created_at) VALUES
-    ('1','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
-    ('2','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
-    ('3','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
-    ('4','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
-    ('5','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
-    ('6','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
-    ('7','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
-    ('8','127.0.0.1','100','100','100',NOW() - INTERVAL '1 HOUR'),
-    ('4','127.0.0.1','100','100','10',NOW()),
-    ('5','127.0.0.1','100','100','1000',NOW());
+-- INSERT INTO server_state (Server_id, Latency, Free_storage, Uptime, Created_at) VALUES
+--     ('1','100','100','100',NOW() - INTERVAL '1 HOUR'),
+--     ('2','100','100','100',NOW() - INTERVAL '1 HOUR'),
+--     ('3','100','100','100',NOW() - INTERVAL '1 HOUR'),
+--     ('4','100','100','100',NOW() - INTERVAL '1 HOUR'),
+--     ('5','100','100','100',NOW() - INTERVAL '1 HOUR'),
+--     ('4','100','100','10',NOW()),
+--     ('5','100','100','1000',NOW());
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back

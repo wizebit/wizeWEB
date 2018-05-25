@@ -11,3 +11,5 @@ dbpass: wize_user_pass
 
 docker_compose_dir: /home/ubuntu/go/src/wizeblock
 docker_compose_fs: /home/ubuntu/go/src/bitbucket.org/udt/wizefs
+
+deploy_release: prod

@@ -6,3 +6,4 @@
 ./backend/backend
 backend/conf/db.conf
 deploy/ansible/*.retry
+backend/wizebit.log
